@@ -26,9 +26,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 
-# TODO: Copy/paste your A1 event_logger code below, and modify it if needed to fit your game
-
-
+# Note: We have completed the Event class for you. Do NOT modify it here for A1.
 @dataclass
 class Event:
     """
@@ -53,13 +51,18 @@ class EventList:
     A linked list of game events.
 
     Instance Attributes:
-        - # TODO add descriptions of instance attributes here
+        - first: the first event in a series of game events, or None if the list is empty
+        - last: the last (most recent) event in the series of game events, or None if the list is empty
 
     Representation Invariants:
-        - # TODO add any appropriate representation invariants, if needed
+        - self.first.prev = None
+        - self.last.next = None
     """
     first: Optional[Event]
     last: Optional[Event]
+
+    # Note: You may ADD parameters/attributes/methods to this class as you see fit.
+    # But do not rename or remove any existing methods/attributes in this class
 
     def __init__(self) -> None:
         """Initialize a new empty event list."""
@@ -69,16 +72,15 @@ class EventList:
 
     def display_events(self) -> None:
         """Display all events in chronological order."""
+
         curr = self.first
         while curr:
             print(f"Location: {curr.id_num}, Command: {curr.next_command}")
             curr = curr.next
 
-    # TODO: Complete the methods below, based on the given descriptions.
     def is_empty(self) -> bool:
         """Return whether this event list is empty."""
-
-        # TODO: Your code below
+        return self.first is None and self.last is None
 
     def add_event(self, event: Event, command: str = None) -> None:
         """
@@ -88,7 +90,14 @@ class EventList:
         """
         # Hint: You should update the previous node's <next_command> as needed
 
-        # TODO: Your code below
+        if self.is_empty():
+            self.first = event          # there's only 1 event
+            self.last = event
+        else:
+            self.last.next = event                  # add the new event to the last event
+            self.last.next_command = command        # add the new command to the last event
+            event.prev = self.last                  # make previous event to the new last event be the former last event
+            self.last = event                       # make the new last event be the newly added event
 
     def remove_last_event(self) -> None:
         """
@@ -97,23 +106,37 @@ class EventList:
         """
         # Hint: The <next_command> and <next> attributes for the new last event should be updated as needed
 
-        # TODO: Your code below
+        if not self.is_empty():
+            if self.first == self.last:     # there's only 1 element
+                self.first = None
+                self.last = None
+            else:
+                self.last = self.last.prev      # set the new last event as the previous event to the former last event
+                self.last.next = None           # make the event after the last event be None
+                self.last.next_command = None   # make the command at last event also be None cuz there is no next event
 
     def get_id_log(self) -> list[int]:
         """Return a list of all location IDs visited for each event in this list, in sequence."""
 
-        # TODO: Your code below
+        ids = []
+        curr = self.first
 
-    # Note: You may add other methods to this class as needed
+        while curr is not None:
+            ids.append(curr.id_num)
+            curr = curr.next
+
+        return ids
 
 
-if __name__ == "__main__":
-    pass
+if __name__ == '__main__':
+    # pass
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'allowed-io': ['EventList.display_events'],
+        'disable': ['R1705', 'static_type_checker']
+    })
+# })
