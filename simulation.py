@@ -30,23 +30,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 
-# Note: We have completed the Location class for you. Do NOT modify it here for A1.
-@dataclass
-class Location:
-    """
-    A location in our text adventure game world.
-
-    Instance Attributes:
-        - id_num: integer id for this location
-        - description: Long description of this location
-        - available_commands: a mapping of available commands at this location to
-                                the location executing that command would lead to
-    """
-    id_num: int
-    description: str
-    available_commands: dict[str, int]
-
-
 class SimpleAdventureGame:
     """
     A simple text adventure game class storing all location data.
