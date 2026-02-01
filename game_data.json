@@ -1,21 +1,127 @@
 {
   "locations": [
     {
-      "id": 1,
-      "name": "Bahen 1F",
-      "brief_description": "You are on the first floor of the Bahen Center. There are elevators to the West, and an exit from the building to St. George street to the East. You see something shiny on the ground -- looks like a toonie?",
-      "long_description": "You are on the first floor of the Bahen Center. It's usually crowded at this time of the day, but today it's eerily quiet. Only a few students are studying at the table near the doors. You better not disturb them. One student is rushing down the corridor, wearing a heavy-looking backpack and carrying a textbook in their arms. There are elevators to the West, and an exit from the building to St. George street to the East.",
+      "id": 0,
+      "name": "Dorm - Chestnut Residence",
+      "brief_description": "Your dorm that your share with your roommate.",
+      "long_description": "Your dorm at Chestnut Residence. It's a bit far from campus, but at least you have your own bathroom.",
       "available_commands": {
-        "go south": 4,
-        "go east": 2
+        "take a shower": -1,
+        "exit": 1
       },
-      "items": ["toonie"]
+      "items": [
+        "deodorant"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Dining Commons - Chestnut Residence",
+      "brief_description": "You can eat some food here.",
+      "long_description": "Your residence dining hall. The food is okay, but at least it's mandatory. You were here pretty late last night, but you don't seem to recall much...",
+      "available_commands": {
+        "grab a bite": -2,
+        "exit": 3
+      },
+      "items": [
+        "Lucky Mug", "Shawarma Wrap", "Monster - Mango Loco"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "King's College Circle",
+      "brief_description": "Front campus. From here, you can access Hart House at the north, the Gerstein Science Information Centre to your east, the Bahen Centre for Information Technology to your west, and Chestnut to your south.",
+      "long_description": "The heart of UofT, where you can see the iconic view of University College. It's quite cold, so there aren't many students around. From here, you can access Hart House at the north, the Gerstein Science Information Centre to your east, the Bahen Centre for Information Technology to your west, and Chestnut to your south.",
+      "available_commands": {
+        "go north": 3,
+        "go south": 2,
+        "go east": 7,
+        "go west": 4
+      },
+      "items": []
+    },
+    {
+      "id": 3,
+      "name": "Hart House - Main",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go north": 6,
+        "go west": 5,
+        "go east": 8,
+        "go south": 9
+      },
+      "items": []
+    },
+    {
+      "id": 8,
+      "name": "Hart House - Gym",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go north": 6,
+        "go west": 5
+      },
+      "items": []
+    },
+    {
+      "id": 9,
+      "name": "Hart House - Arbor Room",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go north": 6,
+        "go west": 5
+      },
+      "items": []
+    },
+    {
+      "id": 4,
+      "name": "Bahen Centre for Information Technology",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go north": "Robarts",
+        "go east": "2",
+        "go south": "1"
+      },
+      "items": []
+    },
+    {
+      "id": 5,
+      "name": "John P. Robarts Research Library",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go east": 3,
+        "go south": 4
+      },
+      "items": []
+    },
+    {
+      "id": 6,
+      "name": "Muzzo Family Alumni Hall",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go south": 3
+      },
+      "items": []
+    },
+    {
+      "id": 7,
+      "name": "Gerstein Science Information Centre",
+      "brief_description": "",
+      "long_description": "",
+      "available_commands": {
+        "go west": 2
+      },
+      "items": []
     }
   ],
   "items": [
     {
-      "name": "toonie",
-      "description": "There is a toonie on the ground. Someone must have dropped it.",
+      "name": "deodorant",
+      "description": "There is a stick of deodorant on your nightstand. You should probably use this",
       "start_position": 1,
       "target_position": 4,
       "target_points": 5
