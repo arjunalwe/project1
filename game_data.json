@@ -23,7 +23,7 @@
         "exit": 3
       },
       "items": [
-        "Lucky Mug", "Shawarma Wrap", "Monster - Mango Loco"
+        "Lucky Mug", "Shawarma Wrap", "Monster Mango Loco Punch"
       ]
     },
     {
@@ -72,7 +72,7 @@
         "go north": 6,
         "go west": 5
       },
-      "items": []
+      "items": ["Monster Mango Logo Punch", "Shawarma Wrap"]
     },
     {
       "id": 4,
@@ -121,7 +121,42 @@
   "items": [
     {
       "name": "deodorant",
-      "description": "There is a stick of deodorant on your nightstand. You should probably use this",
+      "description": "There is a stick of deodorant on your nightstand. You should probably use this.",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 5
+    },
+     {
+      "name": "Lucky Mug",
+      "description": "Your lucky UofT mug. This isn’t just any mug—it’s the one that’s been with you through every late-night study session, every major deadline, and every all-nighter. You can’t possibly submit without it!",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 5
+    },
+    {
+      "name": "USB Drive",
+      "description": "Somehow your only copy of your project. Who even uses USB drives in the big 26? You can’t possibly submit without it!",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 5
+    },
+    {
+      "name": "Laptop Charger",
+      "description": "A ginourmous 200W laptop charger. Your laptop won't just take any random connector- it needs this specific one. You can’t possibly submit without it!",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 5
+    },
+    {
+      "name": "Monster Mango Loco Punch",
+      "description": "Your favourite flavour of Monster.",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 5
+    },
+    {
+      "name": "Shawarma Wrap",
+      "description": "A quick, nutritious, and portable snack.",
       "start_position": 1,
       "target_position": 4,
       "target_points": 5
