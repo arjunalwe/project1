@@ -46,9 +46,11 @@ class AdventureGame:
     #   - _items: a list of Item objects, representing all items in the game.
 
     _locations: dict[int, Location]
-    _items: list[Item]
+    _items: dict[str, Item]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
+    is_clean: bool
+    inventory: list[Item]
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -74,8 +76,11 @@ class AdventureGame:
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
 
+        self.is_clean = False   # the player didn't shower yet, so they're not clean at the start of the game
+        self.inventory = []
+
     @staticmethod
-    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item]]:
+    def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item]]:
         """Load locations and items from a JSON file with the given filename and
         return a tuple consisting of (1) a dictionary of locations mapping each game location's ID to a Location object,
         and (2) a list of all Item objects."""
@@ -89,9 +94,13 @@ class AdventureGame:
                                     loc_data['available_commands'], loc_data['items'])
             locations[loc_data['id']] = location_obj
 
-        items = []
+        items = {}
         # TODO: Add Item objects to the items list; your code should be structured similarly to the loop above
         # YOUR CODE BELOW
+        for item_data in data['items']:
+            item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'],
+                            item_data['target_position'], item_data['target_points'])
+            items[item_data['name']] = item_obj
 
         return locations, items
 
@@ -102,6 +111,16 @@ class AdventureGame:
 
         # TODO: Complete this method as specified
         # YOUR CODE BELOW
+        if loc_id is None:
+            return self._locations[self.current_location_id]
+        else:
+            return self._locations[loc_id]
+
+    def get_item(self, item: str) -> Item:
+        """
+        SOMETHING
+        """
+        return self._items[item]
 
 
 if __name__ == "__main__":
@@ -115,7 +134,7 @@ if __name__ == "__main__":
     # })
 
     game_log = EventList()  # This is REQUIRED as one of the baseline requirements
-    game = AdventureGame('game_data.json', 1)  # load data, setting initial location ID to 1
+    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 1
     menu = ["look", "inventory", "score", "log", "quit"]  # Regular menu options available at each location
     choice = None
 
@@ -157,8 +176,37 @@ if __name__ == "__main__":
 
         else:
             # Handle non-menu actions
+
+            # UPDATE LOCATION
             result = location.available_commands[choice]
             game.current_location_id = result
+
+            # TAKING A SHOWER
+            if choice == "take a shower" and location.id_num == 0:
+                print("you took a shower!")
+                game.is_clean = True
+
+            # ADDING DEODORANT TO INVENTORY
+            if choice == "pick up deodorant" and location.id_num == 0:
+                game.inventory.append(game.get_item("deodorant"))
+                print("u now have deodorant!!")
+
+            # PUTTING DEODORANT
+            if choice == "use deodorant" and game.get_item("deodorant") in game.inventory:
+                game.is_clean = True
+                print("u put deodorant on. thank God!!")
+
+            # ASKING FOR CHARGER AT BAHEN
+            if choice == "ask for charger" and location.id_num == 4:
+                if game.is_clean:
+                    print("u ask someone nearby. since u smell good, they give u the charger")
+                    game.inventory.append(game.get_item("Laptop Charger"))
+                    print("got laptop charger!")
+                else:
+                    print("you ask someone nearby. they say u stink and run away")
+                    print("HINT: you need to clean up first")
+
+
 
             # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
             # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
