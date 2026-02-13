@@ -24,6 +24,8 @@ from typing import Optional
 from game_entities import Location, Item
 from event_logger import Event, EventList
 
+import random
+
 
 # Note: You may add in other import statements here as needed
 
@@ -49,6 +51,9 @@ class AdventureGame:
     _items: dict[str, Item]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
+    movement_timer: int
+    health_bar: int
+    hungry: bool
     inventory: dict[str, list]
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
@@ -75,7 +80,13 @@ class AdventureGame:
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
 
+        self.is_clean = False  # the player didn't shower yet, so they're not clean at the start of the game
         self.inventory = {}
+
+        self.movement_timer = 120
+
+        self.health_bar = 5
+        self.hungry = False
 
     @staticmethod
     def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item]]:
@@ -256,6 +267,16 @@ if __name__ == "__main__":
             # UPDATE LOCATION
             result = location.available_commands[choice]
             game.current_location_id = result
+
+            if choice in location.available_commands:
+                if game.hungry:
+                    game.movement_timer -= random.randint(10, 16)
+                else:
+                    game.movement_timer -= random.randint(5, 8)
+
+                game.health_bar -= 1
+                if game.health_bar == 0:
+                    game.hungry = True
 
             # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
             # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
