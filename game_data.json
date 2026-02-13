@@ -59,8 +59,7 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "go north": 6,
-        "go west": 5
+        "go west": 3
       },
       "items": []
     },
@@ -70,8 +69,8 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "go north": 6,
-        "go west": 5
+        "go north": 3,
+        "go south": 2
       },
       "items": [
         "Monster Mango Loco Punch",
