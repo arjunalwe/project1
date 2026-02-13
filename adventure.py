@@ -38,6 +38,17 @@ class AdventureGame:
     hungry: bool
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
+        """Initialize the game state and load world data from a JSON file.
+
+        Loads locations, items, flags, rules, NPCs, interactions, and settings from the
+        game data file and then initializes runtime state (current location,
+        inventory, score, timers/health, etc.).
+
+        Parameters:
+            game_data_file: Path to the JSON file containing game world data.
+            initial_location_id: The starting location ID for the player.
+        """
+
         (self._locations,
          self._items,
          self.flags,
@@ -62,6 +73,29 @@ class AdventureGame:
 
     @staticmethod
     def _load_game_data(filename: str):
+        """Load game content from a JSON file and build location/item objects.
+
+        The JSON is expected to define:
+        - "items": list of item definitions used to construct Item objects
+        - "locations": list of location definitions used to construct Location objects
+
+        Other keys include:
+        - "initial_flags", "rules", "npcs", "interactions", "settings"
+
+        Parameters:
+            filename: Path to a JSON file containing game data.
+
+        Returns:
+            This is a tuple containing:
+                - locations: dict mapping location IDs to Location objects
+                - items: dict mapping item names to Item objects
+                - initial_flags: dict of starting boolean flags
+                - rules: list of global rule dictionaries
+                - npcs: list of NPC dictionaries
+                - interactions: list of interaction dictionaries
+                - settings: dict of gameplay/settings values
+        """
+
         with open(filename, "r") as f:
             data = json.load(f)
 
@@ -109,7 +143,16 @@ class AdventureGame:
 
     def update_inventory(self, loc_items: list[Item]) -> None:
         """
-        Goo Goo Gaa Gaa
+        Transfer all items from a location into the player's inventory.
+
+        For each item:
+        - Add the item's target points to the player's score.
+        - Increase the item's count in the inventory (keyed by lowercase name),
+          creating a new entry if needed.
+        - Clear the provided location item list after transferring.
+
+        Parameters:
+            loc_items: The list of items currently at the location (mutated/cleared).
         """
         for item in loc_items:
             key = item.name.lower()
@@ -123,6 +166,17 @@ class AdventureGame:
         loc_items.clear()
 
     def add_item_to_inventory(self, item_name: str, count: int = 1) -> None:
+        """
+        Add an item to the player's inventory by name.
+
+        Looking up the Item object from the game's item registry, and then add its target points
+        to the score, and increments the inventory count for that item (creating a new
+        entry if necessary).
+
+        Parameters:
+            item_name: The exact name of the item to add (as stored in the item registry).
+            count: Number of copies to add (default is 1).
+        """
         item = self._items[item_name]
 
         self.score += item.target_points
@@ -230,8 +284,18 @@ class AdventureGame:
         return True
 
     def apply_effects(self, effects: list[dict[str, Any]]) -> None:
-        """"
-        GOO GOO GAA GAA
+        """
+        Apply a sequence of effects defined by rules/interactions/NPC dialogue.
+
+        Effects are data driven dictionaries (loaded from JSON). Effect
+        types include:
+        - "print": print a message
+        - "set_flag": set a boolean flag
+        - "spawn_item_here": place an item in the current location
+        - "add_item_to_inventory": add an item directly to inventory
+
+        Parameters:
+            effects: List of effect dictionaries to apply in order.
         """
         for effect in effects:
             effect_type = effect.get("type")
@@ -300,9 +364,22 @@ class AdventureGame:
                 return
 
     def _decrement_timer(self) -> None:
-        """
-        Calculate time cost based on Health (Hunger) and Energized states.
-        Logic: Energized (0.5x) > Normal (1x) > Hungry/Zero Health (2x)
+        """Decrement the movement timer and health based on status and settings.
+
+        Time cost per move is randomized within the configured "movement_costs"
+        timer_range, then modified by status:
+        - Energized: halves time cost
+        - Starving (health_bar <= 0): doubles time cost
+        - Otherwise: base cost
+
+        Then, if the health_bar  <= 0, these conditions are rendered true:
+        - Reduces movement_timer (clamped at 0)
+        - Reduces health_bar by 1 each move
+        - Prints status readouts
+
+        This condition would work if this condition (time running out) is satisfied, irrespective of the fact
+        whether the character is hungry or not:
+        - Ends the game if time runs out
         """
         ranges = self.settings.get("movement_costs", {})
         low, high = ranges.get("timer_range", [5, 8])
@@ -361,6 +438,18 @@ class AdventureGame:
             print("\nYou turned up empty handed!\n")
 
     def check_win(self) -> None:
+        """
+        Check whether the player has met the victory condition and finish the game.
+
+        Winning condition:
+        - Player is at location ID 0
+        - Player has all required items in inventory
+
+        On win:
+        - Print the win narrative
+        - Add remaining time as a score bonus
+        - Mark the game as no longer ongoing
+        """
         if self.current_location_id == 0:
             required_items = ["lucky mug", "usb drive", "laptop charger"]
             has_all = True
