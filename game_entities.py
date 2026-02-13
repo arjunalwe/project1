@@ -38,6 +38,7 @@ class Location:
     # The only thing you must NOT change is the name of this class: Location.
     # All locations in your game MUST be represented as an instance of this class.
 
+    name: str
     id_num: int
     brief_description: str
     long_description: str

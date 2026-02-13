@@ -90,7 +90,7 @@ class AdventureGame:
 
         locations = {}
         for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['id'], loc_data['brief_description'], loc_data['long_description'],
+            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'], loc_data['long_description'],
                                     loc_data['available_commands'], loc_data['items'])
             locations[loc_data['id']] = location_obj
 
@@ -102,7 +102,6 @@ class AdventureGame:
                             item_data['target_position'], item_data['target_points'])
             items[item_data['name']] = item_obj
 
-        print(items )
         return locations, items
 
     def get_location(self, loc_id: Optional[int] = None) -> Location:
@@ -149,10 +148,7 @@ if __name__ == "__main__":
         # TODO: idk why but log says that all the commands are None
         curr_event = Event(location.id_num, location.long_description, None, None, game_log.get_last())
         game_log.add_event(curr_event)
-
-        # TODO: Depending on whether or not it's been visited before,
-        #  print either full description (first time visit) or brief description (every subsequent visit) of location
-
+        print("Location: ", location.name)
         if location.visited:
             print(location.brief_description)
         else:
@@ -185,33 +181,6 @@ if __name__ == "__main__":
             # UPDATE LOCATION
             result = location.available_commands[choice]
             game.current_location_id = result
-
-            # TAKING A SHOWER
-            if choice == "take a shower" and location.id_num == 0:
-                print("you took a shower!")
-                game.is_clean = True
-
-            # ADDING DEODORANT TO INVENTORY
-            if choice == "pick up deodorant" and location.id_num == 0:
-                game.inventory.append(game.get_item("deodorant"))
-                print("u now have deodorant!!")
-
-            # PUTTING DEODORANT
-            if choice == "use deodorant" and game.get_item("deodorant") in game.inventory:
-                game.is_clean = True
-                print("u put deodorant on. thank God!!")
-
-            # ASKING FOR CHARGER AT BAHEN
-            if choice == "ask for charger" and location.id_num == 4:
-                if game.is_clean:
-                    print("u ask someone nearby. since u smell good, they give u the charger")
-                    game.inventory.append(game.get_item("Laptop Charger"))
-                    print("got laptop charger!")
-                else:
-                    print("you ask someone nearby. they say u stink and run away")
-                    print("HINT: you need to clean up first")
-
-
 
             # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
             # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
