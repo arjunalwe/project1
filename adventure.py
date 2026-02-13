@@ -1,3 +1,29 @@
+"""CSC111 Project 1: Text Adventure Game - Game Manager
+
+
+Instructions (READ THIS FIRST!)
+===============================
+
+
+This Python module contains the code for Project 1. Please consult
+the project handout for instructions and details.
+
+
+Copyright and Usage Information
+===============================
+
+
+This file is provided solely for the personal and private use of students
+taking CSC111 at the University of Toronto St. George campus. All forms of
+distribution of this code, whether as given or with any changes, are
+expressly prohibited. For more information on copyright for CSC111 materials,
+please consult our Course Syllabus.
+
+
+This file is Copyright (c) 2026 CSC111 Teaching Team
+"""
+
+
 from __future__ import annotations
 
 import json
@@ -18,24 +44,25 @@ class AdventureGame:
     _locations: dict[int, Location]
     _items: dict[str, Item]
 
-    # data-driven systems from JSON
     flags: dict[str, bool]
     rules: list[dict[str, Any]]
     npcs: list[dict[str, Any]]
     interactions: list[dict[str, Any]]
     settings: dict[str, Any]
 
-    # runtime state
     current_location_id: int
     ongoing: bool
     inventory: dict[str, list[Any]]  # {lower_item_name: [Item, count]}
     score: int
     moves_made: int
 
-    # gameplay meters
     movement_timer: int
     health_bar: int
     hungry: bool
+
+    energized: bool
+
+    time_elapsed: int
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """Initialize the game state and load world data from a JSON file.
@@ -62,6 +89,7 @@ class AdventureGame:
         self.inventory = {}
         self.score = 0
         self.moves_made = 0
+        self.time_elapsed = 0
 
         self.health_bar = int(self.settings.get("health_bar_start", 10))
         self.movement_timer = int(self.settings.get("movement_timer_start", 120))
@@ -70,9 +98,8 @@ class AdventureGame:
 
         self.hungry = bool(self.settings.get("hungry_start", False))
 
-
     @staticmethod
-    def _load_game_data(filename: str):
+    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item]]:
         """Load game content from a JSON file and build location/item objects.
 
         The JSON is expected to define:
@@ -244,6 +271,7 @@ class AdventureGame:
                 del self.inventory[target]
             else:
                 self.inventory[target][1] = count
+
     def consume_item(self, item_name: str) -> None:
         """Eat an item to restore health (hunger) or gain status effects."""
         target_key = item_name.lower()
@@ -396,12 +424,15 @@ class AdventureGame:
             status_msg = ""
 
         self.movement_timer = max(0, self.movement_timer - time_cost)
+        self.time_elapsed += time_cost  # <--- Increment Total Time
         self.health_bar -= 1
 
         print("-" * 40)
-        print(f"Time Passed: {time_cost} mins{status_msg}")
-        print(f"Time Remaining: {self.movement_timer} minutes until deadline.")
+        print(f"Action Duration: {time_cost} mins{status_msg}")
+        print(f"Total Time Elapsed: {self.time_elapsed} mins")
+        print(f"Time Remaining: {self.movement_timer} mins until deadline.")
         print(f"Hunger Level: {max(0, self.health_bar)}/5")
+
         if self.energized:
             print("STATUS: ENERGIZED (Speed x2)")
         elif self.health_bar <= 0:
@@ -409,7 +440,9 @@ class AdventureGame:
         print("-" * 40)
 
         if self.movement_timer <= 0:
-            print("\nIt is 1:00 PM. You missed the deadline! Now you surely won't make POST... Your life, and your friendship is over!")
+            print(
+                "\nIt is 1:00 PM. You missed the deadline! Now you surely won't make POST... "
+                "Your life, and your friendship is over!")
             print("GAME OVER.")
             self.ongoing = False
             return
@@ -471,6 +504,15 @@ class AdventureGame:
 
 
 if __name__ == "__main__":
+    # When you are ready to check your work with python_ta, uncomment the following lines.
+    # (Delete the "#" and space before each line.)
+    # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
+    })
+
     game_log = EventList()
     game = AdventureGame("game_data.json", 0)
 
@@ -484,7 +526,6 @@ if __name__ == "__main__":
     game_log.add_event(Event(start_loc.id_num, start_loc.long_description))
 
     while game.ongoing:
-        print(f"energized? {game.energized}")
         location = game.get_location()
 
         print("Location:", location.name)
@@ -542,4 +583,3 @@ if __name__ == "__main__":
 
         resulting_loc = game.get_location()
         game_log.add_event(Event(resulting_loc.id_num, resulting_loc.long_description), choice)
-

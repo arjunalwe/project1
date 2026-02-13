@@ -210,3 +210,42 @@ if __name__ == "__main__":
         "exit",    # Dorm (0) -> Dining Commons (1)
         "search",  # picks up items in location 1 -> score increases here
     ]
+
+    # Demo 5: Hunger System demo (Enhancement demo)
+    enhancement1_demo = [
+        "exit",
+        "search",
+        "inventory",
+        "Shawarma Wrap",
+        "eat"
+    ]
+
+    # Demo 6: Obtaining USB Drive demo (Enhancement demo)
+    enhancement2_demo = [
+        "exit",
+        "exit",
+        "talk reuben",
+        "go north",
+        "go north",
+        "search lost and found",
+        "go south",
+        "go south",
+        "talk reuben",
+        "go north",
+        "go east",
+        "open locker",
+        "search"
+    ]
+
+    # Demo 7: Obtaining Laptop Charger demo (Enhancement demo)
+    enhancement3_demo = [
+        "shower",
+        "exit",
+        "exit",
+        "go west",
+        "talk student"
+    ]
+
+    sim = AdventureGameSimulation(GAME_DATA_FILE, INITIAL_LOCATION_ID, win_walkthrough)
+    assert sim.get_id_log() == expected_log, (sim.get_id_log(), expected_log)
+    # sim.run()

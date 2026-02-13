@@ -14,7 +14,7 @@
       "id": 1,
       "name": "Dining Commons - Chestnut Residence",
       "brief_description": "You can eat some food here.",
-      "long_description": "Your residence dining hall. The food is okay, but at least it's mandatory. You were here pretty late last night, but you don't seem to recall much...",
+      "long_description": "Your residence dining hall. The food is kinda bad, but at least it's mandatory. You were here pretty late last night, but you don't seem to recall much...",
       "available_commands": {
         "exit": 2,
         "go home": 0
@@ -41,8 +41,8 @@
     {
       "id": 3,
       "name": "Hart House - Main",
-      "brief_description": "",
-      "long_description": "You can access the Hart House Gym (and your locker) through here (go east)!",
+      "brief_description": "You can access the Hart House Gym (and your locker) to the east, King's College Circle to your south, and Robarts to your west.",
+      "long_description": "A beautifully gothic student hub. You can access the Hart House Gym (and your locker) to the east, King's College Circle to your south, and Robarts to your west.",
       "available_commands": {
         "go north": 6,
         "go west": 5,
@@ -54,21 +54,21 @@
     {
       "id": 8,
       "name": "Hart House - Gym",
-      "brief_description": "",
-      "long_description": "You need your TCard to access your locker... Maybe go look for it (or a friend who might have it)...",
+      "brief_description": "To your west is the main entrance of Hart House, and to your east is the Arbor Room.",
+      "long_description": "You need your TCard to access your locker... Maybe go look for it (or a friend who might have it)... To your west, you have the exit to the main floor of Hart House, and to your east you have the Arbor Room.",
       "available_commands": {
-        "go west": 3
+        "go west": 3,
+        "go east": 9
       },
       "items": []
     },
     {
       "id": 9,
       "name": "Hart House - Arbor Room",
-      "brief_description": "",
-      "long_description": "",
+      "brief_description": "You can go west to go back to the Hart House Gym.",
+      "long_description": "A cute little cafe tucked inside Hart House. You can go west to go back to the Hart House Gym.",
       "available_commands": {
-        "go north": 3,
-        "go south": 2
+        "go west": 3
       },
       "items": [
         "Monster Mango Loco Punch",
@@ -78,8 +78,8 @@
     {
       "id": 4,
       "name": "Bahen Centre for Information Technology",
-      "brief_description": "",
-      "long_description": "",
+      "brief_description": "To your north is Robarts, to your east is King's College Circle, and to your south is your dorm.",
+      "long_description": "The Bahen (pronounced BAY-hen) Centre is the hub for CS and EngSci students alike. To your north is Robarts, to your east is King's College Circle, and to your south is your dorm.",
       "available_commands": {
         "go north": 5,
         "go east": 2,
@@ -96,7 +96,7 @@
         "go east": 3,
         "go south": 4
       },
-      "items": []
+      "items": ["Shawarma Wrap"]
     },
     {
       "id": 6,
@@ -161,7 +161,7 @@
               "has_jacket": true
             }
           },
-          "say": "Bless. Here's your TCard crodie.",
+          "say": "Reuben: Bless. Here's your TCard crodie.",
           "effects": [
             {
               "type": "set_flag",
@@ -176,7 +176,7 @@
               "has_jacket": false
             }
           },
-          "say": "I got your T-Card mattey but it's in my jacket. I left it at Alumni Hall. Maybe you can get the jacket back to me, and in exchange you get the TCard :>",
+          "say": "Reuben: I got your TCard. Maybe if you can get my jacket back to me. I left it at AH. I'll trade you. :>",
           "effects": [
             {
               "type": "set_flag",
@@ -192,7 +192,7 @@
       "location": 4,
       "dialogue": [
         {
-          "say": "Alumni Hall is north of Hart House."
+          "say": "Paul: Oh, you're looking for Alumni Hall? It's to the north of Hart House."
         }
       ]
     },
@@ -201,7 +201,7 @@
       "location": 7,
       "dialogue": [
         {
-          "say": "Alumni Hall is north of Hart House honey."
+          "say": "Ritvik: Oh, you're looking for Alumni Hall? It's north of Hart House honey."
         }
       ]
     },
@@ -224,7 +224,7 @@
               "charger_obtained": false
             }
           },
-          "say": "Sure, you can borrow my charger. Please bring it back later.",
+          "say": "You want to borrow my charger? Sure, here you go. Please bring it back later.",
           "effects": [
             {
               "type": "add_item_to_inventory",
@@ -314,7 +314,7 @@
       "effects": [
         {
           "type": "print",
-          "message": "The gym locker needs a Tcard."
+          "message": "The gym locker needs a TCard."
         }
       ]
     },
