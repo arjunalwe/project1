@@ -18,96 +18,92 @@ please consult our Course Syllabus.
 This file is Copyright (c) 2026 CSC111 Teaching Team
 """
 from __future__ import annotations
+
 import json
+import random
 from typing import Optional
 
-from game_entities import Location, Item
 from event_logger import Event, EventList
-
-import random
+from game_entities import Item, Location
 
 
 # Note: You may add in other import statements here as needed
-
 # Note: You may add helper functions, classes, etc. below as needed
 
 
 class AdventureGame:
-    """A text adventure game class storing all location, item and map data.
-
-    Instance Attributes:
-        - # TODO add descriptions of public instance attributes as needed
-
-    Representation Invariants:
-        - # TODO add any appropriate representation invariants as needed
-    """
+    """A text adventure game class storing all location, item and map data."""
 
     # Private Instance Attributes (do NOT remove these two attributes):
     #   - _locations: a mapping from location id to Location object.
     #                       This represents all the locations in the game.
-    #   - _items: a list of Item objects, representing all items in the game.
+    #   - _items: a dictionary mapping item name to Item object, representing all items in the game.
 
     _locations: dict[int, Location]
     _items: dict[str, Item]
-    current_location_id: int  # Suggested attribute, can be removed
-    ongoing: bool  # Suggested attribute, can be removed
+
+    # Public-ish game state
+    current_location_id: int
+    ongoing: bool
+
+    # Enhancements / state
     movement_timer: int
     health_bar: int
     hungry: bool
-    inventory: dict[str, list]
+    is_clean: bool
+    inventory: dict[str, list]  # {lower_name: [Item, count]}
+    score: int
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
-        """
-        Initialize a new text adventure game, based on the data in the given file, setting starting location of game
-        at the given initial location ID.
-        (note: you are allowed to modify the format of the file as you see fit)
+        """Initialize a new text adventure game, based on the data in the given file.
 
         Preconditions:
         - game_data_file is the filename of a valid game data JSON file
         """
-
-        # NOTES:
-        # You may add parameters/attributes/methods to this class as you see fit.
-
-        # Requirements:
-        # 1. Make sure the Location class is used to represent each location.
-        # 2. Make sure the Item class is used to represent each item.
-
-        # Suggested helper method (you can remove and load these differently if you wish to do so):
         self._locations, self._items = self._load_game_data(game_data_file)
 
-        # Suggested attributes (you can remove and track these differently if you wish to do so):
         self.current_location_id = initial_location_id  # game begins at this location
-        self.ongoing = True  # whether the game is ongoing
+        self.ongoing = True
 
-        self.is_clean = False  # the player didn't shower yet, so they're not clean at the start of the game
+        # Player/game state
+        self.is_clean = False
         self.inventory = {}
+        self.score = 0
 
+        # Timer/health mechanics
         self.movement_timer = 120
-
         self.health_bar = 5
         self.hungry = False
 
     @staticmethod
     def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item]]:
         """Load locations and items from a JSON file with the given filename and
-        return a tuple consisting of (1) a dictionary of locations mapping each game location's ID to a Location object,
-        and (2) a list of all Item objects."""
-
+        return (locations, items).
+        """
         with open(filename, 'r') as f:
-            data = json.load(f)  # This loads all the data from the JSON file
+            data = json.load(f)
 
-        items = {}
+        items: dict[str, Item] = {}
         for item_data in data['items']:
-            item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'],
-                            item_data['target_position'], item_data['target_points'])
+            item_obj = Item(
+                item_data['name'],
+                item_data['description'],
+                item_data['start_position'],
+                item_data['target_position'],
+                item_data['target_points'],
+            )
             items[item_data['name']] = item_obj
 
-        locations = {}
-        for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'],
-                                    loc_data['long_description'],
-                                    loc_data['available_commands'], [items[i] for i in loc_data['items']])
+        locations: dict[int, Location] = {}
+        for loc_data in data['locations']:
+            location_obj = Location(
+                loc_data['name'],
+                loc_data['id'],
+                loc_data['brief_description'],
+                loc_data['long_description'],
+                loc_data['available_commands'],
+                [items[i] for i in loc_data['items']],
+            )
             locations[loc_data['id']] = location_obj
 
         return locations, items
@@ -118,37 +114,28 @@ class AdventureGame:
         """
         if loc_id is None:
             return self._locations[self.current_location_id]
-        else:
-            return self._locations[loc_id]
+        return self._locations[loc_id]
 
     def get_item(self, item: str) -> Item:
-        """
-        SOMETHING
-        """
+        """Return the Item object with the given name (exact key from the JSON)."""
         return self._items[item]
 
     def update_inventory(self, loc_items: list[Item]) -> None:
-        """
-        Add items from a location to the player's inventory.
-        """
+        """Add items from a location to the player's inventory (and clear them from the location)."""
         for i in loc_items:
             name = i.name.lower()
             if name in self.inventory:
                 self.inventory[name][1] += 1
             else:
                 self.inventory[name] = [i, 1]
-
         loc_items.clear()
 
     def manage_inventory(self, current_location: Location) -> None:
-        """
-        Handles the interactive inventory menu: display items, select one, and drop/exit.
-        """
+        """Interactive inventory menu: display items, select one, and drop/exit."""
         if not self.inventory:
             print("Your inventory is empty!")
             return
 
-        # Start a loop so the player can manage multiple items without re-typing 'inventory'
         while True:
             print("\n--- Inventory ---")
             for name, data in self.inventory.items():
@@ -177,12 +164,24 @@ class AdventureGame:
                     if not self.inventory:
                         print("Your inventory is now empty.")
                         break
-
                 elif action != "exit":
                     print("Invalid action.")
             else:
                 print("Item not found.")
 
+    def _apply_movement_costs(self) -> None:
+        """Apply time/health costs for a turn-move (movement)."""
+        if self.hungry:
+            self.movement_timer -= random.randint(10, 16)
+        else:
+            self.movement_timer -= random.randint(5, 8)
+
+        self.movement_timer = max(0, self.movement_timer)
+
+        self.health_bar -= 1
+        if self.health_bar <= 0:
+            self.health_bar = 0
+            self.hungry = True
 
 
 if __name__ == "__main__":
@@ -195,26 +194,28 @@ if __name__ == "__main__":
     #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
     # })
 
-    game_log = EventList()  # This is REQUIRED as one of the baseline requirements
-    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 0
-    menu = ["look", "inventory", "score", "log", "search", "quit"]  # Regular menu options available at each location
-    choice = None
+    game_log = EventList()  # REQUIRED baseline requirement
+    game = AdventureGame('game_data.json', 0)
 
-    # Note: You may modify the code below as needed; the following starter code is just a suggestion
+    menu = ["look", "inventory", "score", "log", "search", "quit"]
+    choice: Optional[str] = None
+
+    # Add initial event (starting location; no previous command)
+    start_loc = game.get_location()
+    game_log.add_event(Event(start_loc.id_num, start_loc.long_description))
+
     while game.ongoing:
-        # Note: If the loop body is getting too long, you should split the body up into helper functions
-        # for better organization. Part of your mark will be based on how well-organized your code is.
-
         location = game.get_location()
 
-        # TODO: idk why but log says that all the commands are None
-        curr_event = Event(location.id_num, location.long_description, None, None, game_log.get_last())
-        game_log.add_event(curr_event)
-        print("Location: ", location.name)
+        print("Location:", location.name)
+
+        # First time at a location: show long description; otherwise show brief description.
+        # (The "look" command always prints the long description.)
         if location.visited:
             print(location.brief_description)
         else:
             print(location.long_description)
+            location.visited = True
 
         # Display possible actions at this location
         print(f"What to do? Choose from: {', '.join(menu)}")
@@ -230,12 +231,13 @@ if __name__ == "__main__":
         print("========")
         print("You decided to:", choice)
 
+        # Execute the choice (menu commands vs movement commands).
         if choice in menu:
             if choice == "log":
                 game_log.display_events()
 
             elif choice == "quit":
-                break
+                game.ongoing = False
 
             elif choice == "inventory":
                 game.manage_inventory(location)
@@ -243,34 +245,26 @@ if __name__ == "__main__":
             elif choice == "search":
                 if len(location.items) > 0:
                     print(f"\nYou found: {', '.join([i.name for i in location.items])}!\n")
+                    # Minimal scoring: +1 per item picked up
+                    game.score += len(location.items)
                     game.update_inventory(location.items)
                 else:
                     print("\nYou turned up empty handed!\n")
 
             elif choice == "look":
-                if location.visited:
-                    print(location.brief_description)
-                else:
-                    print(location.long_description)
+                # Always show the long description when "look" is used
+                print(location.long_description)
 
-            # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
+            elif choice == "score":
+                print(f"Your score is: {game.score}")
 
         else:
-            # Handle non-menu actions
+            # Movement command: update location and apply movement costs
+            next_loc_id = location.available_commands[choice]
+            game.current_location_id = next_loc_id
+            game._apply_movement_costs()
 
-            # UPDATE LOCATION
-            result = location.available_commands[choice]
-            game.current_location_id = result
-
-            if choice in location.available_commands:
-                if game.hungry:
-                    game.movement_timer -= random.randint(10, 16)
-                else:
-                    game.movement_timer -= random.randint(5, 8)
-
-                game.health_bar -= 1
-                if game.health_bar == 0:
-                    game.hungry = True
-
-            # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
-            # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+        # Add an event for *every* command (including non-movement ones).
+        # The EventList stores the command on the previous node's <next_command>.
+        resulting_loc = game.get_location()
+        game_log.add_event(Event(resulting_loc.id_num, resulting_loc.long_description), choice)

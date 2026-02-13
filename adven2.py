@@ -24,6 +24,8 @@ from typing import Optional
 from game_entities import Location, Item
 from event_logger import Event, EventList
 
+import random
+
 
 # Note: You may add in other import statements here as needed
 
@@ -47,12 +49,12 @@ class AdventureGame:
 
     _locations: dict[int, Location]
     _items: dict[str, Item]
-    _item_meta: dict[str, dict]
-    _location_actions: list[dict]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
-    flags: dict[str, bool]
-    inventory: list[Item]
+    movement_timer: int
+    health_bar: int
+    hungry: bool
+    inventory: dict[str, list]
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -72,17 +74,22 @@ class AdventureGame:
         # 2. Make sure the Item class is used to represent each item.
 
         # Suggested helper method (you can remove and load these differently if you wish to do so):
-        self._locations, self._items, self._item_meta, self._location_actions, self.flags = \
-            self._load_game_data(game_data_file)
+        self._locations, self._items = self._load_game_data(game_data_file)
 
         # Suggested attributes (you can remove and track these differently if you wish to do so):
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
-        self.inventory = []
+
+        self.is_clean = False  # the player didn't shower yet, so they're not clean at the start of the game
+        self.inventory = {}
+
+        self.movement_timer = 120
+
+        self.health_bar = 5
+        self.hungry = False
 
     @staticmethod
-    def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item], dict[str, dict], list[dict],
-                                               dict[str, bool]]:
+    def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item]]:
         """Load locations and items from a JSON file with the given filename and
         return a tuple consisting of (1) a dictionary of locations mapping each game location's ID to a Location object,
         and (2) a list of all Item objects."""
@@ -90,33 +97,25 @@ class AdventureGame:
         with open(filename, 'r') as f:
             data = json.load(f)  # This loads all the data from the JSON file
 
-        locations = {}
-        for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['id'], loc_data['brief_description'], loc_data['long_description'],
-                                    loc_data['available_commands'], loc_data['items'])
-            locations[loc_data['id']] = location_obj
-
         items = {}
-        item_meta = {}
-        # TODO: Add Item objects to the items list; your code should be structured similarly to the loop above
-        # YOUR CODE BELOW
         for item_data in data['items']:
             item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'],
                             item_data['target_position'], item_data['target_points'])
             items[item_data['name']] = item_obj
-            item_meta[item_data['name']] = item_data
 
-        location_actions = data.get('location_actions', [])
-        initial_flags = data.get('initial_flags', {})
-        return locations, items, item_meta, location_actions, initial_flags
+        locations = {}
+        for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
+            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'],
+                                    loc_data['long_description'],
+                                    loc_data['available_commands'], [items[i] for i in loc_data['items']])
+            locations[loc_data['id']] = location_obj
+
+        return locations, items
 
     def get_location(self, loc_id: Optional[int] = None) -> Location:
         """Return Location object associated with the provided location ID.
         If no ID is provided, return the Location object associated with the current location.
         """
-
-        # TODO: Complete this method as specified
-        # YOUR CODE BELOW
         if loc_id is None:
             return self._locations[self.current_location_id]
         else:
@@ -128,130 +127,62 @@ class AdventureGame:
         """
         return self._items[item]
 
-    def _resolve_item_name(self, raw_name: str) -> Optional[str]:
-        """Return the canonical item name matching raw_name (case-insensitive).
-
-        Return None if there is no item with this name.
+    def update_inventory(self, loc_items: list[Item]) -> None:
         """
-        target = raw_name.strip().lower()
-        for name in self._items:
-            if name.lower() == target:
-                return name
-        return None
-
-    def _has_item(self, item_name: str) -> bool:
-        """Return whether the player currently has item_name in their inventory."""
-        return any(it.name == item_name for it in self.inventory)
-
-    def _apply_effects(self, effects: list[dict]) -> None:
-        """Apply a list of data-driven effects."""
-        for effect in effects:
-            effect_type = effect.get('type')
-
-            if effect_type == 'print':
-                print(effect.get('message', ''))
-
-            elif effect_type == 'set_flag':
-                flag = effect.get('flag')
-                value = effect.get('value')
-                if isinstance(flag, str) and isinstance(value, bool):
-                    self.flags[flag] = value
-
-    def _try_location_action(self, command: str) -> bool:
-        """Try to execute a special location action defined in the JSON.
-
-        Return True iff an action was executed.
+        Add items from a location to the player's inventory.
         """
-        for rule in self._location_actions:
-            if rule.get('command', '').lower() != command:
-                continue
-            if self.current_location_id not in rule.get('locations', []):
-                continue
+        for i in loc_items:
+            name = i.name.lower()
+            if name in self.inventory:
+                self.inventory[name][1] += 1
+            else:
+                self.inventory[name] = [i, 1]
 
-            self._apply_effects(rule.get('effects', []))
-            return True
-        return False
+        loc_items.clear()
 
-    def try_pickup(self, raw_item_name: str) -> bool:
-        """Try to pick up an item from the current location.
-
-        Return True iff the pickup succeeded.
+    def manage_inventory(self, current_location: Location) -> None:
         """
-        location = self.get_location()
-        canonical = self._resolve_item_name(raw_item_name)
-        if canonical is None:
-            print("That item doesn't exist.")
-            return False
+        Handles the interactive inventory menu: display items, select one, and drop/exit.
+        """
+        if not self.inventory:
+            print("Your inventory is empty!")
+            return
 
-        # Item must be present in the current location.
-        location_item_match = None
-        for loc_item in location.items:
-            if loc_item.lower() == canonical.lower():
-                location_item_match = loc_item
+        # Start a loop so the player can manage multiple items without re-typing 'inventory'
+        while True:
+            print("\n--- Inventory ---")
+            for name, data in self.inventory.items():
+                print(f"{data[0].name} (x{data[1]})")
+            print("-----------------")
+            target = input("Select item to manage (or 'exit'): ").lower().strip()
+
+            if target == "exit":
                 break
-        if location_item_match is None:
-            print("That item isn't here.")
-            return False
 
-        # Enforce data-driven pickup requirements (e.g., flags).
-        meta = self._item_meta.get(canonical, {})
-        req_flags = meta.get('pickup_requires_flags', {})
-        for flag, required_val in req_flags.items():
-            if self.flags.get(flag) != required_val:
-                for msg in meta.get('pickup_fail_messages', []):
-                    print(msg)
-                return False
+            if target in self.inventory:
+                item_entry = self.inventory[target]
+                item_obj = item_entry[0]
 
-        # Success.
-        location.items.remove(location_item_match)
-        if not self._has_item(canonical):
-            self.inventory.append(self.get_item(canonical))
+                print(f"Selected: {item_obj.name}")
+                action = input("Action [drop, exit]: ").lower().strip()
 
-        for msg in meta.get('pickup_success_messages', []):
-            print(msg)
-        if not meta.get('pickup_success_messages'):
-            print(f"Picked up {canonical}.")
-        return True
+                if action == "drop":
+                    current_location.items.append(item_obj)
+                    item_entry[1] -= 1
+                    print(f"Dropped {item_obj.name}.")
 
-    def try_drop(self, raw_item_name: str) -> bool:
-        """Try to drop an item into the current location.
+                    if item_entry[1] <= 0:
+                        del self.inventory[target]
 
-        Return True iff the drop succeeded.
-        """
-        canonical = self._resolve_item_name(raw_item_name)
-        if canonical is None:
-            print("That item doesn't exist.")
-            return False
+                    if not self.inventory:
+                        print("Your inventory is now empty.")
+                        break
 
-        for i, it in enumerate(self.inventory):
-            if it.name == canonical:
-                self.inventory.pop(i)
-                self.get_location().items.append(canonical)
-                print(f"Dropped {canonical}.")
-                return True
+                elif action != "exit":
+                    print("Invalid action.")
+            else:
+                print("Item not found.")
 
-        print("You don't have that item.")
-        return False
-
-    def try_use(self, raw_item_name: str) -> bool:
-        """Try to use an item currently in the player's inventory.
-
-        Return True iff the item was used (i.e., it existed in inventory).
-        """
-        canonical = self._resolve_item_name(raw_item_name)
-        if canonical is None:
-            print("That item doesn't exist.")
-            return False
-
-        if not self._has_item(canonical):
-            print("You can only use items in your inventory.")
-            return False
-
-        meta = self._item_meta.get(canonical, {})
-        self._apply_effects(meta.get('use_effects', []))
-        if not meta.get('use_effects'):
-            print(f"You can't use {canonical} right now.")
-        return True
 
 
 if __name__ == "__main__":
@@ -265,8 +196,8 @@ if __name__ == "__main__":
     # })
 
     game_log = EventList()  # This is REQUIRED as one of the baseline requirements
-    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 1
-    menu = ["look", "inventory", "score", "log", "quit"]  # Regular menu options available at each location
+    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 0
+    menu = ["look", "inventory", "score", "log", "search", "quit"]  # Regular menu options available at each location
     choice = None
 
     # Note: You may modify the code below as needed; the following starter code is just a suggestion
@@ -276,35 +207,23 @@ if __name__ == "__main__":
 
         location = game.get_location()
 
-        # TODO: Add new Event to game log to represent current game location
-        #  Note that the <choice> variable should be the command which led to this event
-        # YOUR CODE HERE
-
-        # TODO: Depending on whether or not it's been visited before,
-        #  print either full description (first time visit) or brief description (every subsequent visit) of location
-        # YOUR CODE HERE
+        # TODO: idk why but log says that all the commands are None
+        curr_event = Event(location.id_num, location.long_description, None, None, game_log.get_last())
+        game_log.add_event(curr_event)
+        print("Location: ", location.name)
+        if location.visited:
+            print(location.brief_description)
+        else:
+            print(location.long_description)
 
         # Display possible actions at this location
-        print("What to do? Choose from: look, inventory, score, log, quit")
+        print(f"What to do? Choose from: {', '.join(menu)}")
         print("At this location, you can also:")
         for action in location.available_commands:
             print("-", action)
 
-        # Validate choice
         choice = input("\nEnter action: ").lower().strip()
-
-        def _is_valid_command(cmd: str) -> bool:
-            return (
-                cmd in menu
-                or cmd in location.available_commands
-                or cmd.startswith('pick up ')
-                or cmd.startswith('pickup ')
-                or cmd.startswith('drop ')
-                or cmd.startswith('use ')
-                or any(rule.get('command', '').lower() == cmd for rule in game._location_actions)
-            )
-
-        while not _is_valid_command(choice):
+        while choice not in location.available_commands and choice not in menu:
             print("That was an invalid option; try again.")
             choice = input("\nEnter action: ").lower().strip()
 
@@ -312,30 +231,53 @@ if __name__ == "__main__":
         print("You decided to:", choice)
 
         if choice in menu:
-            # TODO: Handle each menu command as appropriate
             if choice == "log":
                 game_log.display_events()
+
+            elif choice == "quit":
+                break
+
+            elif choice == "inventory":
+                game.manage_inventory(location)
+
+            elif choice == "search":
+                if len(location.items) > 0:
+                    print(f"\nYou found: {', '.join([i.name for i in location.items])}!\n")
+                    game.update_inventory(location.items)
+                else:
+                    print("\nYou turned up empty handed!\n")
+
+            elif choice == "look":
+                if location.visited:
+                    print(location.brief_description)
+                else:
+                    print(location.long_description)
+
             # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
 
         else:
             # Handle non-menu actions
 
+            # UPDATE LOCATION
+            result = location.available_commands[choice]
+            game.current_location_id = result
+
             if choice in location.available_commands:
-                # Movement
-                game.current_location_id = location.available_commands[choice]
+                if game.hungry:
+                    game.movement_timer -= random.randint(10, 16)
+                else:
+                    game.movement_timer -= random.randint(5, 8)
 
-            elif choice.startswith('pick up '):
-                game.try_pickup(choice[len('pick up '):])
+                game.health_bar -= 1
+                if game.health_bar == 0:
+                    game.hungry = True
 
-            elif choice.startswith('pickup '):
-                game.try_pickup(choice[len('pickup '):])
+            # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
+            # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
 
-            elif choice.startswith('drop '):
-                game.try_drop(choice[len('drop '):])
 
-            elif choice.startswith('use '):
-                game.try_use(choice[len('use '):])
 
-            else:
-                # Data-driven special actions tied to locations
-                game._try_location_action(choice)
+
+
+
+
