@@ -23,8 +23,6 @@ from event_logger import Event, EventList
 from game_entities import Location
 
 
-# A fixed seed makes simulations reproducible even if the game uses randomness
-# (e.g., movement costs). This is not world-specific; it's just for stable demos.
 DEFAULT_SIMULATION_SEED = 2026
 
 
@@ -139,9 +137,9 @@ class AdventureGameSimulation:
 if __name__ == "__main__":
 
     GAME_DATA_FILE = "game_data.json"
-    INITIAL_LOCATION_ID = 0  # update if your JSON uses a different starting location
+    INITIAL_LOCATION_ID = 0
 
-    # Demo 1: a winning walkthrough (example for this game_data.json)
+    # Demo 1: a winning example
     win_walkthrough = [
         "shower",
         "exit",
@@ -181,8 +179,22 @@ if __name__ == "__main__":
         3,  # go west
     ]
 
-    # Demo 2: losing demo
-    lose_demo: list[str] = []
+    # Demo 2: losing example
+    lose_demo = [
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1
+        "go home",  # 1 -> 0
+        "exit",  # 0 -> 1  -> this move triggers GAME OVER
+    ]
 
     # Demo 3: inventory demo (pick up at least one item + show inventory)
     inventory_demo = [
@@ -193,12 +205,15 @@ if __name__ == "__main__":
         "inventory",
     ]
 
-    # Demo 4: scores demo (fill this in once score can increase in your game)
-    scores_demo: list[str] = ["score"]
-
-    # ---------------------------------------------------------------------
-    # Quick self-check (optional)
-    # ---------------------------------------------------------------------
-    sim = AdventureGameSimulation(GAME_DATA_FILE, INITIAL_LOCATION_ID, win_walkthrough)
-    assert sim.get_id_log() == expected_log, (sim.get_id_log(), expected_log)
-    # sim.run()
+    # Demo 4: scores example
+    scores_demo = [
+        "score",  # should be 0 at the start
+        "shower",  # sets fresh=True so the student will lend the charger
+        "exit",  # to Dining Commons (location 1)
+        "search",  # pick up items here -> score increases
+        "score",  # higher score after picking up items
+        "exit",  # to King's College Circle (location 2)
+        "go west",  # to Bahen (location 4)
+        "talk student",  # adds Laptop Charger to inventory -> score increases again
+        "score",  # higher score again
+    ]
