@@ -102,6 +102,7 @@ class AdventureGame:
                             item_data['target_position'], item_data['target_points'])
             items[item_data['name']] = item_obj
 
+        print(items )
         return locations, items
 
     def get_location(self, loc_id: Optional[int] = None) -> Location:
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     # })
 
     game_log = EventList()  # This is REQUIRED as one of the baseline requirements
-    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 1
+    game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 0
     menu = ["look", "inventory", "score", "log", "quit"]  # Regular menu options available at each location
     choice = None
 

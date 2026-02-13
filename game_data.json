@@ -82,7 +82,7 @@
       "available_commands": {
         "go north": 5,
         "go east": 2,
-        "go south": 1,
+        "go south": 1
       },
       "items": []
     },
