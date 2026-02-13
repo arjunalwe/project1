@@ -181,7 +181,7 @@ if __name__ == "__main__":
         3,  # go west
     ]
 
-    # Demo 2: losing demo (fill this in to match your lose condition(s))
+    # Demo 2: losing demo
     lose_demo: list[str] = []
 
     # Demo 3: inventory demo (pick up at least one item + show inventory)
