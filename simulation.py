@@ -6,7 +6,7 @@ It is meant for:
 - validating a command sequence (e.g., your win walkthrough) by checking the
   resulting location ID log, and
 - generating demo runs for required game features (win/lose/inventory/score/enhancements),
-  as referenced by the project report. fileciteturn3file1
+  as referenced by the project report.
 
 Important design note:
 - This simulator is intentionally *data-driven*: it executes the same commands
@@ -36,7 +36,7 @@ class AdventureGameSimulation:
       - records an Event after each command (even if the location does not change)
 
     This mirrors the pattern used in your interactive loop in adventure.py, where
-    an event is appended after each player action. fileciteturn3file11
+    an event is appended after each player action.
     """
 
     _game: AdventureGame
