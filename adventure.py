@@ -221,10 +221,9 @@ class AdventureGame:
             return
 
         while True:
-            print("\n--- Inventory ---")
+            print("\n Inventory")
             for _, (item, count) in self.inventory.items():
                 print(f"{item.name} (x{count})")
-            print("-----------------")
             target = input("Select item to manage (or 'exit'): ").lower().strip()
 
             if target == "exit":
@@ -516,7 +515,6 @@ if __name__ == "__main__":
     game_log = EventList()
     game = AdventureGame("game_data.json", 0)
 
-    # Menu is data-driven if provided; otherwise use the default below.
     menu: list[str] = list(game.settings.get(
         "menu",
         ["look", "inventory", "score", "log", "search", "quit"],
