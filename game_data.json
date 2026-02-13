@@ -142,7 +142,7 @@
       "then": [
         {
           "type": "print",
-          "message": "Oh shi, you just forgot that you left the USB Drive in a Hart House Gym locker."
+          "message": "Its been a long time now friend, try thinking harder. Maybe you just forgot he USB Drive in your Hart House Gym locker."
         },
         {
           "type": "set_flag",
@@ -163,7 +163,7 @@
               "has_jacket": true
             }
           },
-          "say": "Bless. Here\u2019s your TCard crodie.",
+          "say": "Bless. Here's your TCard crodie.",
           "effects": [
             {
               "type": "set_flag",
@@ -178,7 +178,7 @@
               "has_jacket": false
             }
           },
-          "say": "I got your T-Card mattey but it\u2019s in my jacket. I left it at Alumni Hall. Maybe you can get the jacket back to me, and in exchange you get the TCard :>",
+          "say": "I got your T-Card mattey but it's in my jacket. I left it at Alumni Hall. Maybe you can get the jacket back to me, and in exchange you get the TCard :>",
           "effects": [
             {
               "type": "set_flag",
@@ -217,7 +217,7 @@
               "charger_obtained": true
             }
           },
-          "say": "You already have a charger \u2014 go grind."
+          "say": "You already have a charger friend, go grind."
         },
         {
           "requires": {
@@ -251,7 +251,7 @@
               "charger_obtained": false
             }
           },
-          "say": "Uhh\u2026 no offense, but please shower or at least put on deodorant first."
+          "say": "Uhh >_< no offense, but please shower or at least put on deodorant first."
         }
       ]
     }
@@ -333,7 +333,7 @@
       "effects": [
         {
           "type": "print",
-          "message": "This is a gym locker, but you don\u2019t need it (yet)..."
+          "message": "This is a gym locker, but you don't need it (yet)..."
         }
       ]
     },
@@ -402,21 +402,21 @@
     },
     {
       "name": "Lucky Mug",
-      "description": "Your lucky UofT mug. This isn\u2019t just any mug\u2014it\u2019s the one that\u2019s been with you through every late-night study session, every major deadline, and every all-nighter. You can\u2019t possibly submit without it!",
+      "description": "Your lucky UofT mug. This isn't just any mug, it's the one that's been with you through every late-night study session, every major deadline, and every all-nighter. You can't possibly submit without it!",
       "start_position": 1,
       "target_position": 0,
       "target_points": 50
     },
     {
       "name": "USB Drive",
-      "description": "Somehow your only copy of your project. Who even uses USB drives in the big 26? You can\u2019t possibly submit without it!",
+      "description": "Somehow your only copy of your project. Who even uses USB drives in the big 26? You can't possibly submit without it!",
       "start_position": 1,
       "target_position": 0,
       "target_points": 50
     },
     {
       "name": "Laptop Charger",
-      "description": "A ginourmous 200W laptop charger. Your laptop won't just take any random connector- it needs this specific one. You can\u2019t possibly submit without it!",
+      "description": "A ginourmous 200W laptop charger. Your laptop won't just take any random connector- it needs this specific one. You can't possibly submit without it!",
       "start_position": 1,
       "target_position": 0,
       "target_points": 50
