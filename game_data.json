@@ -6,8 +6,6 @@
       "brief_description": "Your dorm that your share with your roommate.",
       "long_description": "Your dorm at Chestnut Residence. It's a bit far from campus, but at least you have your own bathroom.",
       "available_commands": {
-        "pick up deodorant": 0,
-        "use deodorant": 0,
         "take a shower": 0,
         "exit": 1
       },
@@ -21,7 +19,6 @@
       "brief_description": "You can eat some food here.",
       "long_description": "Your residence dining hall. The food is okay, but at least it's mandatory. You were here pretty late last night, but you don't seem to recall much...",
       "available_commands": {
-        "use deodarant": 1,
         "grab a bite": 1,
         "exit": 3
       },
@@ -35,7 +32,6 @@
       "brief_description": "Front campus. From here, you can access Hart House at the north, the Gerstein Science Information Centre to your east, the Bahen Centre for Information Technology to your west, and Chestnut to your south.",
       "long_description": "The heart of UofT, where you can see the iconic view of University College. It's quite cold, so there aren't many students around. From here, you can access Hart House at the north, the Gerstein Science Information Centre to your east, the Bahen Centre for Information Technology to your west, and Chestnut to your south.",
       "available_commands": {
-        "use deodarant": 2,
         "go north": 3,
         "go south": 2,
         "go east": 7,
@@ -49,7 +45,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 3,
         "go north": 6,
         "go west": 5,
         "go east": 8,
@@ -63,7 +58,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 8,
         "go north": 6,
         "go west": 5
       },
@@ -75,7 +69,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 9,
         "go north": 6,
         "go west": 5
       },
@@ -87,11 +80,9 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 4,
-        "go north": "Robarts",
+        "go north": 5,
         "go east": 2,
         "go south": 1,
-        "ask for charger": 4
       },
       "items": []
     },
@@ -101,7 +92,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 5,
         "go east": 3,
         "go south": 4
       },
@@ -113,7 +103,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 6,
         "go south": 3
       },
       "items": []
@@ -124,7 +113,6 @@
       "brief_description": "",
       "long_description": "",
       "available_commands": {
-        "use deodarant": 7,
         "go west": 2
       },
       "items": []
