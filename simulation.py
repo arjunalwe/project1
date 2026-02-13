@@ -207,13 +207,6 @@ if __name__ == "__main__":
 
     # Demo 4: scores example
     scores_demo = [
-        "score",  # should be 0 at the start
-        "shower",  # sets fresh=True so the student will lend the charger
-        "exit",  # to Dining Commons (location 1)
-        "search",  # pick up items here -> score increases
-        "score",  # higher score after picking up items
-        "exit",  # to King's College Circle (location 2)
-        "go west",  # to Bahen (location 4)
-        "talk student",  # adds Laptop Charger to inventory -> score increases again
-        "score",  # higher score again
+        "exit",    # Dorm (0) -> Dining Commons (1)
+        "search",  # picks up items in location 1 -> score increases here
     ]
