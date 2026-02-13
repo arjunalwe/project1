@@ -155,7 +155,7 @@
       "dialogue": [
         {
           "requires": { "flags": { "has_jacket": true } },
-          "say": "Bless. Here’s your T Card crodie.",
+          "say": "Bless. Here’s your TCard crodie.",
           "effects": [
             { "type": "set_flag", "flag": "has_tcard", "value": true }
           ]
