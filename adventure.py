@@ -49,8 +49,7 @@ class AdventureGame:
     _items: dict[str, Item]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
-    is_clean: bool
-    inventory: dict[Item, int]
+    inventory: dict[str, list]
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -76,7 +75,6 @@ class AdventureGame:
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
 
-        self.is_clean = False  # the player didn't shower yet, so they're not clean at the start of the game
         self.inventory = {}
 
     @staticmethod
@@ -120,16 +118,16 @@ class AdventureGame:
 
     def update_inventory(self, loc_items: list[Item]) -> None:
         """
-        goo goo gaa gaa
+        Add items from a location to the player's inventory.
         """
         for i in loc_items:
-            if i in self.inventory:
-                self.inventory[i] += 1
-
+            name = i.name.lower()
+            if name in self.inventory:
+                self.inventory[name][0] += 1
             else:
-                self.inventory[i] = 1
+                self.inventory[name] = [i, 1]
 
-        location.items.clear()
+        loc_items.clear()
 
 
 
@@ -187,28 +185,30 @@ if __name__ == "__main__":
                 break
 
             elif choice == "inventory":
-                if len(game.inventory) > 0:
-                    for index, i in enumerate(game.inventory):
-                        i = i.name
-                        print(f"\n{index}. {i}\n")
-
-                    print("Exit or select an item!")
-                    inventoryAction = input("\nEnter action: ").lower().strip()
-                    temp_inventory = [i.name.lower() for i in game.inventory]
-                    while inventoryAction != "exit" and inventoryAction not in temp_inventory:
-                        print("That was an invalid option; try again.")
-                        inventoryAction = input("\nEnter action: ").lower().strip()
-
-                    if inventoryAction != "exit":
-                        print("Exit or select an action!")
-                        inventoryAction = input("\nEnter action: ").lower().strip()
-                        temp_inventory = [i.name.lower() for i in game.inventory]
-                        while inventoryAction != "exit" and inventoryAction not in temp_inventory:
-                            print("That was an invalid option; try again.")
-                            inventoryAction = input("\nEnter action: ").lower().strip()
+                if not game.inventory:
+                    print("Your inventory is empty!")
                 else:
-                    print("\nYour inventory is empty!\n")
-
+                    print("--- Inventory ---")
+                    for name, data in game.inventory.items():
+                        print(f"{data[0].name} (x{data[1]})")
+                    print("-----------------")
+                    target = input("Select item to manage (or 'exit'): ").lower().strip()
+                    if target != "exit":
+                        if target in game.inventory:
+                            item_entry = game.inventory[target]
+                            item_obj = item_entry[0]
+                            print(f"Selected: {item_obj.name}")
+                            action = input("Action [drop, exit]: ").lower().strip()
+                            if action == "drop":
+                                location.items.append(item_obj)
+                                item_entry[1] -= 1
+                                print(f"Dropped {item_obj.name}.")
+                                if item_entry[1] <= 0:
+                                    del game.inventory[target]
+                            elif action != "exit":
+                                print("Invalid action.")
+                        else:
+                            print("Item not found.")
             elif choice == "search":
                 if len(location.items) > 0:
                     print(f"\nYou found: {', '.join([i.name for i in location.items])}!\n")

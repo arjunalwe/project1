@@ -45,7 +45,6 @@ class Item:
     start_position: int
     target_position: int
     target_points: int
-    available_commands: list[str]
 
 
 @dataclass
