@@ -127,6 +127,11 @@ class EventList:
 
         return ids
 
+    def get_last(self) -> Event:
+        """Return the last event"""
+
+        return self.last
+
 
 if __name__ == '__main__':
     # pass

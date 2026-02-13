@@ -149,6 +149,8 @@ if __name__ == "__main__":
         # TODO: Add new Event to game log to represent current game location
         #  Note that the <choice> variable should be the command which led to this event
         # YOUR CODE HERE
+        curr_event = Event(location.id_num, location.long_description, None, None, game_log.get_last())
+        game_log.add_event(curr_event)
 
         # TODO: Depending on whether or not it's been visited before,
         #  print either full description (first time visit) or brief description (every subsequent visit) of location
