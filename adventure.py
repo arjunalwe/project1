@@ -146,15 +146,17 @@ if __name__ == "__main__":
 
         location = game.get_location()
 
-        # TODO: Add new Event to game log to represent current game location
-        #  Note that the <choice> variable should be the command which led to this event
-        # YOUR CODE HERE
+        # TODO: idk why but log says that all the commands are None
         curr_event = Event(location.id_num, location.long_description, None, None, game_log.get_last())
         game_log.add_event(curr_event)
 
         # TODO: Depending on whether or not it's been visited before,
         #  print either full description (first time visit) or brief description (every subsequent visit) of location
-        # YOUR CODE HERE
+
+        if location.visited:
+            print(location.brief_description)
+        else:
+            print(location.long_description)
 
         # Display possible actions at this location
         print("What to do? Choose from: look, inventory, score, log, quit")

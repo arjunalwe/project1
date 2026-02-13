@@ -20,7 +20,7 @@
       "long_description": "Your residence dining hall. The food is okay, but at least it's mandatory. You were here pretty late last night, but you don't seem to recall much...",
       "available_commands": {
         "grab a bite": 1,
-        "exit": 3
+        "exit": 2
       },
       "items": [
         "Lucky Mug", "Shawarma Wrap", "Monster Mango Loco Punch"
