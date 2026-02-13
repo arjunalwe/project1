@@ -8,9 +8,7 @@
       "available_commands": {
         "exit": 1
       },
-      "items": [
-        "Old Spice Swagger Deodorant"
-      ]
+      "items": []
     },
     {
       "id": 1,
@@ -199,7 +197,7 @@
       ]
     },
     {
-      "name": "gerstein_friend",
+      "name": "ritvik",
       "location": 7,
       "dialogue": [
         {
@@ -258,7 +256,7 @@
   ],
   "interactions": [
     {
-      "command": "search jacket pile",
+      "command": "search lost and found",
       "locations": [
         6
       ],
@@ -271,7 +269,7 @@
       "effects": [
         {
           "type": "print",
-          "message": "You find your friend's jacket. Good job."
+          "message": "You found your friend's jacket!"
         },
         {
           "type": "set_flag",
@@ -394,46 +392,51 @@
   ],
   "items": [
     {
-      "name": "Old Spice Swagger Deodorant",
-      "description": "There is a stick of deodorant on your nightstand. You should probably use this.",
-      "start_position": 0,
-      "target_position": 4,
-      "target_points": 5
-    },
-    {
       "name": "Lucky Mug",
-      "description": "Your lucky UofT mug. This isn't just any mug, it's the one that's been with you through every late-night study session, every major deadline, and every all-nighter. You can't possibly submit without it!",
+      "description": "Your lucky UofT mug...",
       "start_position": 1,
       "target_position": 0,
-      "target_points": 50
+      "target_points": 50,
+      "edible": false,
+      "restore_value": 0
     },
     {
       "name": "USB Drive",
-      "description": "Somehow your only copy of your project. Who even uses USB drives in the big 26? You can't possibly submit without it!",
+      "description": "Somehow your only copy of your project...",
       "start_position": 1,
       "target_position": 0,
-      "target_points": 50
+      "target_points": 50,
+      "edible": false,
+      "restore_value": 0
     },
     {
       "name": "Laptop Charger",
-      "description": "A ginourmous 200W laptop charger. Your laptop won't just take any random connector- it needs this specific one. You can't possibly submit without it!",
+      "description": "A ginourmous 200W laptop charger...",
       "start_position": 1,
       "target_position": 0,
-      "target_points": 50
-    },
-    {
-      "name": "Monster Mango Loco Punch",
-      "description": "Your favourite flavour of Monster.",
-      "start_position": 1,
-      "target_position": 4,
-      "target_points": 10
+      "target_points": 50,
+      "edible": false,
+      "restore_value": 0
     },
     {
       "name": "Shawarma Wrap",
-      "description": "A quick, nutritious, and portable snack.",
+      "description": "A quick, nutritious, and portable snack. Restores hunger.",
       "start_position": 1,
       "target_position": 4,
-      "target_points": 5
+      "target_points": 5,
+      "edible": true,
+      "restore_value": 5,
+      "special_effect": null
+    },
+    {
+      "name": "Monster Mango Loco Punch",
+      "description": "Your favourite flavour of Monster. Gives you wings (double speed).",
+      "start_position": 1,
+      "target_position": 4,
+      "target_points": 10,
+      "edible": true,
+      "restore_value": 0,
+      "special_effect": "energize"
     }
   ],
   "settings": {

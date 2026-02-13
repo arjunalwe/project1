@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import random
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from event_logger import Event, EventList
 from game_entities import Item, Location
@@ -48,20 +48,18 @@ class AdventureGame:
 
         self.current_location_id = initial_location_id
         self.ongoing = True
-
         self.inventory = {}
         self.score = 0
         self.moves_made = 0
 
-        # Gameplay defaults are configurable via JSON under top-level key "settings".
-        # If omitted, the defaults below keep the game runnable.
+        self.health_bar = int(self.settings.get("health_bar_start", 10))
         self.movement_timer = int(self.settings.get("movement_timer_start", 120))
-        self.health_bar = int(self.settings.get("health_bar_start", 5))
+
+        self.energized = False
+
         self.hungry = bool(self.settings.get("hungry_start", False))
 
-    # -------------------------------------------------------------------------
-    # Loading
-    # -------------------------------------------------------------------------
+
     @staticmethod
     def _load_game_data(filename: str):
         with open(filename, "r") as f:
@@ -75,6 +73,9 @@ class AdventureGame:
                 item_data["start_position"],
                 item_data["target_position"],
                 item_data["target_points"],
+                item_data.get("edible", False),
+                item_data.get("restore_value", 0),
+                item_data.get("special_effect")
             )
             items[item_data["name"]] = item
 
@@ -106,23 +107,26 @@ class AdventureGame:
             loc_id = self.current_location_id
         return self._locations[loc_id]
 
-    # -------------------------------------------------------------------------
-    # Inventory
-    # -------------------------------------------------------------------------
     def update_inventory(self, loc_items: list[Item]) -> None:
-        """Move all items from the current location into the player's inventory."""
+        """
+        Goo Goo Gaa Gaa
+        """
         for item in loc_items:
             key = item.name.lower()
+            self.score += item.target_points
+            print(f"Points gained: {item.target_points}")
+
             if key in self.inventory:
                 self.inventory[key][1] += 1
             else:
                 self.inventory[key] = [item, 1]
         loc_items.clear()
 
-
-    def _add_item_to_inventory(self, item_name: str, count: int = 1) -> None:
-        """Add count copies of the named item to the player's inventory."""
+    def add_item_to_inventory(self, item_name: str, count: int = 1) -> None:
         item = self._items[item_name]
+
+        self.score += item.target_points
+
         key = item.name.lower()
         if key in self.inventory:
             self.inventory[key][1] += count
@@ -130,7 +134,7 @@ class AdventureGame:
             self.inventory[key] = [item, count]
 
     def manage_inventory(self, current_location: Location) -> None:
-        """Interactively manage inventory (currently supports dropping items)."""
+        """Interactively manage inventory (drop or eat items)."""
         if not self.inventory:
             print("Your inventory is empty!")
             return
@@ -150,27 +154,70 @@ class AdventureGame:
                 continue
 
             item_obj, count = self.inventory[target]
-            action = input("Action [drop, exit]: ").lower().strip()
+
+            options = ["drop", "exit"]
+            if item_obj.edible:
+                options.append("eat")
+
+            prompt = f"Action [{', '.join(options)}]: "
+            action = input(prompt).lower().strip()
 
             if action == "exit":
                 continue
-            if action != "drop":
+
+            if action == "drop":
+                current_location.items.append(item_obj)
+                count -= 1
+                print(f"Dropped {item_obj.name}.")
+
+            elif action == "eat" and item_obj.edible:
+                print(f"You consume the {item_obj.name}.")
+
+                if item_obj.restore_value > 0:
+                    self.health_bar += item_obj.restore_value
+                    self.energized = False
+                    print(f"Hunger satiated! Health is now {self.health_bar}.")
+
+                if item_obj.special_effect == "energize":
+                    self.energized = True
+                    print("You feel a surge of caffeine! You are now ENERGIZED (Double Speed).")
+                count -= 1
+            else:
                 print("Invalid action.")
                 continue
-
-            current_location.items.append(item_obj)
-            count -= 1
-            print(f"Dropped {item_obj.name}.")
 
             if count <= 0:
                 del self.inventory[target]
             else:
                 self.inventory[target][1] = count
+    def consume_item(self, item_name: str) -> None:
+        """Eat an item to restore health (hunger) or gain status effects."""
+        target_key = item_name.lower()
+        if target_key not in self.inventory:
+            print("You don't have that item.")
+            return
 
+        item_obj, count = self.inventory[target_key]
 
-    # -------------------------------------------------------------------------
-    # Flags, requirements, rules, effects
-    # -------------------------------------------------------------------------
+        if not item_obj.edible:
+            print(f"You can't eat the {item_obj.name}!")
+            return
+
+        print(f"You consume the {item_obj.name}.")
+
+        if item_obj.restore_value > 0:
+            self.health_bar += item_obj.restore_value
+            self.energized = False  # Eating food cancels the energy drink rush (optional balancing)
+            print(f"Hunger satiated! Health is now {self.health_bar}.")
+
+        if item_obj.special_effect == "energize":
+            self.energized = True
+            print("You feel a surge of caffeine! You are now ENERGIZED (Double Speed).")
+
+        self.inventory[target_key][1] -= 1
+        if self.inventory[target_key][1] <= 0:
+            del self.inventory[target_key]
+
     def requirements_met(self, requires: dict[str, Any]) -> bool:
         """Return True iff all requirements are satisfied (currently only flags)."""
         if not requires:
@@ -183,18 +230,25 @@ class AdventureGame:
         return True
 
     def apply_effects(self, effects: list[dict[str, Any]]) -> None:
-        """Apply a list of effects (data-driven from JSON)."""
-        handlers: dict[str, Callable[[dict[str, Any]], None]] = {
-            "print": lambda eff: print(eff["message"]),
-            "set_flag": lambda eff: self.flags.__setitem__(eff["flag"], eff["value"]),
-            "spawn_item_here": lambda eff: self.get_location().items.append(self._items[eff["item"]]),
-            "add_item_to_inventory": lambda eff: self._add_item_to_inventory(eff["item"], int(eff.get("count", 1))),
-        }
+        """"
+        GOO GOO GAA GAA
+        """
+        for effect in effects:
+            effect_type = effect.get("type")
 
-        for eff in effects:
-            eff_type = eff.get("type")
-            if eff_type in handlers:
-                handlers[eff_type](eff)
+            if effect_type == "print":
+                print(effect["message"])
+
+            elif effect_type == "set_flag":
+                self.flags[effect["flag"]] = effect["value"]
+
+            elif effect_type == "spawn_item_here":
+                item_obj = self._items[effect["item"]]
+                self.get_location().items.append(item_obj)
+
+            elif effect_type == "add_item_to_inventory":
+                count = int(effect.get("count", 1))
+                self.add_item_to_inventory(effect["item"], count)
 
     def apply_rules(self) -> None:
         """Evaluate and apply all global rules (data-driven from JSON)."""
@@ -206,9 +260,6 @@ class AdventureGame:
                 continue
             self.apply_effects(rule.get("then", []))
 
-    # -------------------------------------------------------------------------
-    # Special commands: NPC talk + interactions
-    # -------------------------------------------------------------------------
     def get_special_commands(self) -> list[str]:
         """Return special commands available at the current location."""
         cmds: list[str] = []
@@ -248,22 +299,46 @@ class AdventureGame:
                     print("You can't do that yet.")
                 return
 
-    # -------------------------------------------------------------------------
-    # Movement / time
-    # -------------------------------------------------------------------------
     def _decrement_timer(self) -> None:
-        """Apply one movement's time/health cost using settings-driven ranges."""
+        """
+        Calculate time cost based on Health (Hunger) and Energized states.
+        Logic: Energized (0.5x) > Normal (1x) > Hungry/Zero Health (2x)
+        """
         ranges = self.settings.get("movement_costs", {})
-        if self.hungry:
-            low, high = ranges.get("hungry_timer_range", [10, 16])
+        low, high = ranges.get("timer_range", [5, 8])
+        base_cost = random.randint(int(low), int(high))
+
+        if self.energized:
+            time_cost = base_cost // 2
+            status_msg = " (Energized!)"
+        elif self.health_bar <= 0:
+            time_cost = base_cost * 2
+            status_msg = " (Starving... moving slowly)"
         else:
-            low, high = ranges.get("timer_range", [5, 8])
+            time_cost = base_cost
+            status_msg = ""
 
-        self.movement_timer = max(0, self.movement_timer - random.randint(int(low), int(high)))
+        self.movement_timer = max(0, self.movement_timer - time_cost)
+        self.health_bar -= 1
 
-        self.health_bar -= int(ranges.get("health_per_move", 1))
-        if self.health_bar <= 0:
-            self.hungry = True
+        print("-" * 40)
+        print(f"Time Passed: {time_cost} mins{status_msg}")
+        print(f"Time Remaining: {self.movement_timer} minutes until deadline.")
+        print(f"Hunger Level: {max(0, self.health_bar)}/5")
+        if self.energized:
+            print("STATUS: ENERGIZED (Speed x2)")
+        elif self.health_bar <= 0:
+            print("STATUS: HUNGRY (Speed x0.5)")
+        print("-" * 40)
+
+        if self.movement_timer <= 0:
+            print("\nIt is 1:00 PM. You missed the deadline! Now you surely won't make POST... Your life, and your friendship is over!")
+            print("GAME OVER.")
+            self.ongoing = False
+            return
+
+        if self.health_bar <= 0 and not self.energized:
+            print("Your stomach grumbles loudly. You need calories!")
 
     def move(self, command: str) -> None:
         """Move to a new location using a command that exists in current location."""
@@ -273,6 +348,37 @@ class AdventureGame:
         self._decrement_timer()
         self.moves_made += 1
         self.apply_rules()
+
+    def search_location(self) -> None:
+        """Search the current location for items."""
+        location = self.get_location()
+        if location.items:
+            found_names = ", ".join([item.name for item in location.items])
+            print(f"\nYou found: {found_names}!\n")
+
+            self.update_inventory(location.items)
+        else:
+            print("\nYou turned up empty handed!\n")
+
+    def check_win(self) -> None:
+        if self.current_location_id == 0:
+            required_items = ["lucky mug", "usb drive", "laptop charger"]
+            has_all = True
+            for req in required_items:
+                if req not in self.inventory:
+                    has_all = False
+                    break
+
+            if has_all:
+                print("\nYou burst into your dorm room with moments to spare!")
+                print("You plug in your laptop, drink some coffee, and submit the project!")
+
+                time_bonus = self.movement_timer
+                self.score += time_bonus
+                print(f"Time Bonus: {time_bonus}")
+                print(f"Final Score: {self.score}")
+                print("YOU WIN!")
+                self.ongoing = False
 
 
 if __name__ == "__main__":
@@ -288,19 +394,8 @@ if __name__ == "__main__":
     start_loc = game.get_location()
     game_log.add_event(Event(start_loc.id_num, start_loc.long_description))
 
-    menu_handlers: dict[str, Callable[[Location], None]] = {
-        "log": lambda _: game_log.display_events(),
-        "quit": lambda _: setattr(game, "ongoing", False),
-        "inventory": lambda loc: game.manage_inventory(loc),
-        "search": lambda loc: (
-            (print(f"\nYou found: {', '.join([i.name for i in loc.items])}!\n"), game.update_inventory(loc.items))
-            if loc.items else print("\nYou turned up empty handed!\n")
-        ),
-        "look": lambda loc: print(loc.long_description),
-        "score": lambda _: print("Score:", game.score),
-    }
-
     while game.ongoing:
+        print(f"energized? {game.energized}")
         location = game.get_location()
 
         print("Location:", location.name)
@@ -323,16 +418,39 @@ if __name__ == "__main__":
         print("========")
         print("You decided to:", choice)
 
-        if choice in menu_handlers:
-            menu_handlers[choice](location)
+        if choice == "log":
+            game_log.display_events()
+
+        elif choice == "quit":
+            game.ongoing = False
+
+        elif choice == "inventory":
+            game.manage_inventory(location)
+
+        elif choice == "search":
+            game.search_location()
+
+        elif choice == "look":
+            print(location.long_description)
+
+        elif choice == "score":
+            print(f"Score: {game.score}")
+
+        elif choice.startswith("eat "):
+            item_to_eat = choice.replace("eat ", "", 1).strip()
+            game.consume_item(item_to_eat)
+
         elif choice.startswith("talk "):
             game.run_talk(choice.replace("talk ", "", 1))
+
         elif choice in special_cmds:
             game.run_interaction(choice)
+
         else:
             game.move(choice)
 
+        game.check_win()
+
         resulting_loc = game.get_location()
         game_log.add_event(Event(resulting_loc.id_num, resulting_loc.long_description), choice)
-
 

@@ -19,6 +19,7 @@ please consult our Course Syllabus.
 This file is Copyright (c) 2026 CSC111 Teaching Team
 """
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -45,6 +46,9 @@ class Item:
     start_position: int
     target_position: int
     target_points: int
+    edible: bool = False
+    restore_value: int = 0
+    special_effect: Optional[str] = None
 
 
 @dataclass
