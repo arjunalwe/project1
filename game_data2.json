@@ -121,7 +121,6 @@
     "is_clean": false
   },
   "location_actions": [
-
     {
       "command": "take a shower",
       "locations": [0],

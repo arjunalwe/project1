@@ -74,7 +74,7 @@
         "go west": 5
       },
       "items": [
-        "Monster Mango Logo Punch",
+        "Monster Mango Loco Punch",
         "Shawarma Wrap"
       ]
     },
@@ -128,7 +128,7 @@
       "description": "There is a stick of deodorant on your nightstand. You should probably use this.",
       "start_position": 0,
       "target_position": 4,
-      "target_points": 5
+      "target_points": 5,
     },
     {
       "name": "Lucky Mug",

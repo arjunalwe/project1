@@ -22,32 +22,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Location:
-    """A location in our text adventure game world.
-
-    Instance Attributes:
-        - # TODO Describe each instance attribute here
-
-    Representation Invariants:
-        - # TODO Describe any necessary representation invariants
-    """
-
-    # This is just a suggested starter class for Location.
-    # You may change/add parameters and the data available for each Location object as you see fit.
-    #
-    # The only thing you must NOT change is the name of this class: Location.
-    # All locations in your game MUST be represented as an instance of this class.
-
-    name: str
-    id_num: int
-    brief_description: str
-    long_description: str
-    available_commands: dict[str, int]
-    items: list[str]
-    visited: bool = False
-
-
-@dataclass
 class Item:
     """An item in our text adventure game world.
 
@@ -71,6 +45,33 @@ class Item:
     start_position: int
     target_position: int
     target_points: int
+    available_commands: list[str]
+
+
+@dataclass
+class Location:
+    """A location in our text adventure game world.
+
+    Instance Attributes:
+        - # TODO Describe each instance attribute here
+
+    Representation Invariants:
+        - # TODO Describe any necessary representation invariants
+    """
+
+    # This is just a suggested starter class for Location.
+    # You may change/add parameters and the data available for each Location object as you see fit.
+    #
+    # The only thing you must NOT change is the name of this class: Location.
+    # All locations in your game MUST be represented as an instance of this class.
+
+    name: str
+    id_num: int
+    brief_description: str
+    long_description: str
+    available_commands: dict[str, int]
+    items: list[Item]
+    visited: bool = False
 
 
 # Note: Other entities you may want to add, depending on your game plan:

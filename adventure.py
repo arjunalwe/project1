@@ -88,18 +88,18 @@ class AdventureGame:
         with open(filename, 'r') as f:
             data = json.load(f)  # This loads all the data from the JSON file
 
-        locations = {}
-        for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'],
-                                    loc_data['long_description'],
-                                    loc_data['available_commands'], loc_data['items'])
-            locations[loc_data['id']] = location_obj
-
         items = {}
         for item_data in data['items']:
             item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'],
                             item_data['target_position'], item_data['target_points'])
             items[item_data['name']] = item_obj
+
+        locations = {}
+        for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
+            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'],
+                                    loc_data['long_description'],
+                                    loc_data['available_commands'], [items[i] for i in loc_data['items']])
+            locations[loc_data['id']] = location_obj
 
         return locations, items
 
@@ -189,11 +189,12 @@ if __name__ == "__main__":
             elif choice == "inventory":
                 if len(game.inventory) > 0:
                     for index, i in enumerate(game.inventory):
+                        i = i.name
                         print(f"\n{index}. {i}\n")
 
                     print("Exit or select an item!")
                     inventoryAction = input("\nEnter action: ").lower().strip()
-                    temp_inventory = [i.lower() for i in game.inventory]
+                    temp_inventory = [i.name.lower() for i in game.inventory]
                     while inventoryAction != "exit" and inventoryAction not in temp_inventory:
                         print("That was an invalid option; try again.")
                         inventoryAction = input("\nEnter action: ").lower().strip()
@@ -201,7 +202,7 @@ if __name__ == "__main__":
                     if inventoryAction != "exit":
                         print("Exit or select an action!")
                         inventoryAction = input("\nEnter action: ").lower().strip()
-                        temp_inventory = [i.lower() for i in game.inventory]
+                        temp_inventory = [i.name.lower() for i in game.inventory]
                         while inventoryAction != "exit" and inventoryAction not in temp_inventory:
                             print("That was an invalid option; try again.")
                             inventoryAction = input("\nEnter action: ").lower().strip()
@@ -210,7 +211,7 @@ if __name__ == "__main__":
 
             elif choice == "search":
                 if len(location.items) > 0:
-                    print(f"\nYou found: {', '.join(location.items)}!\n")
+                    print(f"\nYou found: {', '.join([i.name for i in location.items])}!\n")
                     game.update_inventory(location.items)
                 else:
                     print("\nYou turned up empty handed!\n")
