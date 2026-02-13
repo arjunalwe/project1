@@ -123,11 +123,60 @@ class AdventureGame:
         for i in loc_items:
             name = i.name.lower()
             if name in self.inventory:
-                self.inventory[name][0] += 1
+                self.inventory[name][1] += 1
             else:
                 self.inventory[name] = [i, 1]
 
         loc_items.clear()
+
+    def manage_inventory(self, current_location: Location) -> None:
+        """
+        Handles the interactive inventory menu: display items, select one, and drop/exit.
+        """
+        if not self.inventory:
+            print("Your inventory is empty!")
+            return
+
+        # Start a loop so the player can manage multiple items without re-typing 'inventory'
+        while True:
+            print("\n--- Inventory ---")
+            for name, data in self.inventory.items():
+                print(f"{data[0].name} (x{data[1]})")
+            print("-----------------")
+
+            target = input("Select item to manage (or 'exit'): ").lower().strip()
+
+            if target == "exit":
+                break
+
+            if target in self.inventory:
+                item_entry = self.inventory[target]
+                item_obj = item_entry[0]
+
+                print(f"Selected: {item_obj.name}")
+                action = input("Action [drop, exit]: ").lower().strip()
+
+                if action == "drop":
+                    # 1. Add item back to location
+                    current_location.items.append(item_obj)
+
+                    # 2. Decrease count
+                    item_entry[1] -= 1
+                    print(f"Dropped {item_obj.name}.")
+
+                    # 3. Remove from inventory if count is 0
+                    if item_entry[1] <= 0:
+                        del self.inventory[target]
+
+                    # 4. Stop if inventory is empty
+                    if not self.inventory:
+                        print("Your inventory is now empty.")
+                        break
+
+                elif action != "exit":
+                    print("Invalid action.")
+            else:
+                print("Item not found.")
 
 
 
@@ -168,7 +217,6 @@ if __name__ == "__main__":
         for action in location.available_commands:
             print("-", action)
 
-        # Validate choice
         choice = input("\nEnter action: ").lower().strip()
         while choice not in location.available_commands and choice not in menu:
             print("That was an invalid option; try again.")
@@ -185,30 +233,8 @@ if __name__ == "__main__":
                 break
 
             elif choice == "inventory":
-                if not game.inventory:
-                    print("Your inventory is empty!")
-                else:
-                    print("--- Inventory ---")
-                    for name, data in game.inventory.items():
-                        print(f"{data[0].name} (x{data[1]})")
-                    print("-----------------")
-                    target = input("Select item to manage (or 'exit'): ").lower().strip()
-                    if target != "exit":
-                        if target in game.inventory:
-                            item_entry = game.inventory[target]
-                            item_obj = item_entry[0]
-                            print(f"Selected: {item_obj.name}")
-                            action = input("Action [drop, exit]: ").lower().strip()
-                            if action == "drop":
-                                location.items.append(item_obj)
-                                item_entry[1] -= 1
-                                print(f"Dropped {item_obj.name}.")
-                                if item_entry[1] <= 0:
-                                    del game.inventory[target]
-                            elif action != "exit":
-                                print("Invalid action.")
-                        else:
-                            print("Item not found.")
+                game.manage_inventory(location)
+
             elif choice == "search":
                 if len(location.items) > 0:
                     print(f"\nYou found: {', '.join([i.name for i in location.items])}!\n")
