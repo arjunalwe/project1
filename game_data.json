@@ -125,7 +125,8 @@
     "usb_known_in_locker": false,
     "has_tcard": false,
     "know_alumni_hall": false,
-    "has_jacket": false
+    "has_jacket": false,
+    "friend_requested_jacket": false
   },
   "rules": [
     {
@@ -175,7 +176,13 @@
             }
           },
           "say": "I got your T-Card mattey but it’s in my jacket. I left it at Alumni Hall. Maybe you can get the jacket back to me, and in exchange you get the TCard :>",
-          "effects": []
+          "effects": [
+            {
+              "type": "set_flag",
+              "flag": "friend_requested_jacket",
+              "value": true
+            }
+          ]
         }
       ]
     },
@@ -231,7 +238,8 @@
       "requires": {
         "flags": {
           "know_alumni_hall": true,
-          "has_jacket": false
+          "has_jacket": false,
+          "friend_requested_jacket": true
         }
       },
       "effects": [
