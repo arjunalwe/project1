@@ -154,7 +154,6 @@ class AdventureGame:
             for name, data in self.inventory.items():
                 print(f"{data[0].name} (x{data[1]})")
             print("-----------------")
-
             target = input("Select item to manage (or 'exit'): ").lower().strip()
 
             if target == "exit":
@@ -168,18 +167,13 @@ class AdventureGame:
                 action = input("Action [drop, exit]: ").lower().strip()
 
                 if action == "drop":
-                    # 1. Add item back to location
                     current_location.items.append(item_obj)
-
-                    # 2. Decrease count
                     item_entry[1] -= 1
                     print(f"Dropped {item_obj.name}.")
 
-                    # 3. Remove from inventory if count is 0
                     if item_entry[1] <= 0:
                         del self.inventory[target]
 
-                    # 4. Stop if inventory is empty
                     if not self.inventory:
                         print("Your inventory is now empty.")
                         break
