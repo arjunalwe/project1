@@ -121,130 +121,189 @@
       "items": []
     }
   ],
-
-
-
   "initial_flags": {
     "usb_known_in_locker": false,
     "has_tcard": false,
     "know_alumni_hall": false,
     "has_jacket": false
   },
-
   "rules": [
     {
       "when": {
         "moves_at_least": 8,
-        "flags": { "usb_known_in_locker": false }
+        "flags": {
+          "usb_known_in_locker": false
+        }
       },
       "then": [
         {
           "type": "print",
           "message": "Oh shi, you just forgot that you left the USB Drive in a Hart House locker."
         },
-        { "type": "set_flag", "flag": "usb_known_in_locker", "value": true }
+        {
+          "type": "set_flag",
+          "flag": "usb_known_in_locker",
+          "value": true
+        }
       ]
     }
   ],
-
   "npcs": [
     {
       "name": "friend",
       "location": 2,
       "dialogue": [
         {
-          "requires": { "flags": { "has_jacket": true } },
+          "requires": {
+            "flags": {
+              "has_jacket": true
+            }
+          },
           "say": "Bless. Here’s your TCard crodie.",
           "effects": [
-            { "type": "set_flag", "flag": "has_tcard", "value": true }
+            {
+              "type": "set_flag",
+              "flag": "has_tcard",
+              "value": true
+            }
           ]
         },
         {
-          "requires": { "flags": { "has_jacket": false } },
+          "requires": {
+            "flags": {
+              "has_jacket": false
+            }
+          },
           "say": "I got your T-Card mattey but it’s in my jacket. I left it at Alumni Hall. Maybe you can get the jacket back to me, and in exchange you get the TCard :>",
           "effects": []
         }
       ]
     },
-
     {
       "name": "paul",
       "location": 4,
       "dialogue": [
         {
-          "requires": { "flags": { "know_alumni_hall": false } },
+          "requires": {
+            "flags": {
+              "know_alumni_hall": false
+            }
+          },
           "say": "Alumni Hall is north of Hart House.",
           "effects": [
-            { "type": "set_flag", "flag": "know_alumni_hall", "value": true }
+            {
+              "type": "set_flag",
+              "flag": "know_alumni_hall",
+              "value": true
+            }
           ]
         }
       ]
     },
-
     {
       "name": "gerstein_friend",
       "location": 7,
       "dialogue": [
         {
-          "requires": { "flags": { "know_alumni_hall": false } },
+          "requires": {
+            "flags": {
+              "know_alumni_hall": false
+            }
+          },
           "say": "Alumni Hall is north of Hart House honey.",
           "effects": [
-            { "type": "set_flag", "flag": "know_alumni_hall", "value": true }
+            {
+              "type": "set_flag",
+              "flag": "know_alumni_hall",
+              "value": true
+            }
           ]
         }
       ]
     }
   ],
-
   "interactions": [
     {
       "command": "search jacket pile",
-      "locations": [6],
+      "locations": [
+        6
+      ],
       "requires": {
-        "flags": { "know_alumni_hall": true, "has_jacket": false }
+        "flags": {
+          "know_alumni_hall": true,
+          "has_jacket": false
+        }
       },
       "effects": [
-        { "type": "print", "message": "You find your friend's jacket. Good job." },
-        { "type": "set_flag", "flag": "has_jacket", "value": true }
+        {
+          "type": "print",
+          "message": "You find your friend's jacket. Good job."
+        },
+        {
+          "type": "set_flag",
+          "flag": "has_jacket",
+          "value": true
+        }
       ]
     },
-
     {
       "command": "open locker",
-      "locations": [3],
+      "locations": [
+        3
+      ],
       "requires": {
-        "flags": { "usb_known_in_locker": true, "has_tcard": true }
+        "flags": {
+          "usb_known_in_locker": true,
+          "has_tcard": true
+        }
       },
       "effects": [
         {
           "type": "print",
           "message": "You tap your T-Card. The locker opens. Your USB Drive is inside."
         },
-        { "type": "spawn_item_here", "item": "USB Drive" }
+        {
+          "type": "spawn_item_here",
+          "item": "USB Drive"
+        }
       ]
     },
     {
       "command": "open locker",
-      "locations": [3],
+      "locations": [
+        3
+      ],
       "requires": {
-        "flags": { "usb_known_in_locker": true, "has_tcard": false }
+        "flags": {
+          "usb_known_in_locker": true,
+          "has_tcard": false
+        }
       },
       "effects": [
-        { "type": "print", "message": "The locker needs a Tcard." }
+        {
+          "type": "print",
+          "message": "The locker needs a Tcard."
+        }
       ]
     },
     {
       "command": "open locker",
-      "locations": [3],
+      "locations": [
+        3
+      ],
       "requires": {
-        "flags": { "usb_known_in_locker": false }
+        "flags": {
+          "usb_known_in_locker": false
+        }
       },
       "effects": [
-        { "type": "print", "message": "This is a locker, but you don’t need it (yet)..." }
+        {
+          "type": "print",
+          "message": "This is a locker, but you don’t need it (yet)..."
+        }
       ]
     }
   ],
-
   "items": [
     {
       "name": "Old Spice Swagger Deodorant",
@@ -289,7 +348,4 @@
       "target_points": 5
     }
   ]
-
 }
-
-
