@@ -50,7 +50,7 @@ class AdventureGame:
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
     is_clean: bool
-    inventory: list[Item]
+    inventory: dict[Item, int]
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -76,8 +76,8 @@ class AdventureGame:
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
 
-        self.is_clean = False   # the player didn't shower yet, so they're not clean at the start of the game
-        self.inventory = []
+        self.is_clean = False  # the player didn't shower yet, so they're not clean at the start of the game
+        self.inventory = {}
 
     @staticmethod
     def _load_game_data(filename: str) -> tuple[dict[int, Location], dict[str, Item]]:
@@ -90,13 +90,12 @@ class AdventureGame:
 
         locations = {}
         for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'], loc_data['long_description'],
+            location_obj = Location(loc_data['name'], loc_data['id'], loc_data['brief_description'],
+                                    loc_data['long_description'],
                                     loc_data['available_commands'], loc_data['items'])
             locations[loc_data['id']] = location_obj
 
         items = {}
-        # TODO: Add Item objects to the items list; your code should be structured similarly to the loop above
-        # YOUR CODE BELOW
         for item_data in data['items']:
             item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'],
                             item_data['target_position'], item_data['target_points'])
@@ -108,9 +107,6 @@ class AdventureGame:
         """Return Location object associated with the provided location ID.
         If no ID is provided, return the Location object associated with the current location.
         """
-
-        # TODO: Complete this method as specified
-        # YOUR CODE BELOW
         if loc_id is None:
             return self._locations[self.current_location_id]
         else:
@@ -121,6 +117,20 @@ class AdventureGame:
         SOMETHING
         """
         return self._items[item]
+
+    def update_inventory(self, loc_items: list[Item]) -> None:
+        """
+        goo goo gaa gaa
+        """
+        for i in loc_items:
+            if i in self.inventory:
+                self.inventory[i] += 1
+
+            else:
+                self.inventory[i] = 1
+
+        location.items.clear()
+
 
 
 if __name__ == "__main__":
@@ -135,7 +145,7 @@ if __name__ == "__main__":
 
     game_log = EventList()  # This is REQUIRED as one of the baseline requirements
     game = AdventureGame('game_data.json', 0)  # load data, setting initial location ID to 0
-    menu = ["look", "inventory", "score", "log", "quit"]  # Regular menu options available at each location
+    menu = ["look", "inventory", "score", "log", "search", "quit"]  # Regular menu options available at each location
     choice = None
 
     # Note: You may modify the code below as needed; the following starter code is just a suggestion
@@ -155,7 +165,7 @@ if __name__ == "__main__":
             print(location.long_description)
 
         # Display possible actions at this location
-        print("What to do? Choose from: look, inventory, score, log, quit")
+        print(f"What to do? Choose from: {', '.join(menu)}")
         print("At this location, you can also:")
         for action in location.available_commands:
             print("-", action)
@@ -170,9 +180,47 @@ if __name__ == "__main__":
         print("You decided to:", choice)
 
         if choice in menu:
-            # TODO: Handle each menu command as appropriate
             if choice == "log":
                 game_log.display_events()
+
+            elif choice == "quit":
+                break
+
+            elif choice == "inventory":
+                if len(game.inventory) > 0:
+                    for index, i in enumerate(game.inventory):
+                        print(f"\n{index}. {i}\n")
+
+                    print("Exit or select an item!")
+                    inventoryAction = input("\nEnter action: ").lower().strip()
+                    temp_inventory = [i.lower() for i in game.inventory]
+                    while inventoryAction != "exit" and inventoryAction not in temp_inventory:
+                        print("That was an invalid option; try again.")
+                        inventoryAction = input("\nEnter action: ").lower().strip()
+
+                    if inventoryAction != "exit":
+                        print("Exit or select an action!")
+                        inventoryAction = input("\nEnter action: ").lower().strip()
+                        temp_inventory = [i.lower() for i in game.inventory]
+                        while inventoryAction != "exit" and inventoryAction not in temp_inventory:
+                            print("That was an invalid option; try again.")
+                            inventoryAction = input("\nEnter action: ").lower().strip()
+                else:
+                    print("\nYour inventory is empty!\n")
+
+            elif choice == "search":
+                if len(location.items) > 0:
+                    print(f"\nYou found: {', '.join(location.items)}!\n")
+                    game.update_inventory(location.items)
+                else:
+                    print("\nYou turned up empty handed!\n")
+
+            elif choice == "look":
+                if location.visited:
+                    print(location.brief_description)
+                else:
+                    print(location.long_description)
+
             # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
 
         else:
